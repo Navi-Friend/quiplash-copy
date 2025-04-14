@@ -1,0 +1,43 @@
+{
+	"name": "quiplash_server",
+	"version": "1.0.0",
+	"description": "server for quiplash game",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "test",
+		"dev": "nodemon --exec \"tsx\" src/index.ts",
+		"lint": "eslint"
+	},
+	"author": "Ivan Konovalov",
+	"license": "ISC",
+	"devDependencies": {
+		"@eslint/js": "^9.24.0",
+		"@types/cookie-parser": "^1.4.8",
+		"@types/express": "^5.0.1",
+		"@types/uuid": "^10.0.0",
+		"@typescript-eslint/eslint-plugin": "^8.29.1",
+		"@typescript-eslint/parser": "^8.29.1",
+		"eslint": "^9.24.0",
+		"eslint-config-prettier": "^10.1.2",
+		"eslint-plugin-prettier": "^5.2.6",
+		"globals": "^16.0.0",
+		"nodemon": "^3.1.9",
+		"prettier": "^3.5.3",
+		"tsx": "^4.19.3",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.29.1"
+	},
+	"dependencies": {
+		"cookie-parser": "^1.4.7",
+		"dotenv": "^16.5.0",
+		"express": "^5.1.0",
+		"inversify": "^7.5.0",
+		"redis": "^4.7.0",
+		"socket.io": "^4.8.1",
+		"uuid": "^11.1.0",
+		"winston": "^3.17.0",
+		"winston-daily-rotate-file": "^5.0.0",
+		"zod": "^3.24.2"
+	}
+}
