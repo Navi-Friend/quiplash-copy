@@ -10,6 +10,9 @@ import GameService from './modules/game/services/game.service';
 import IGameService from './modules/game/services/game.service.interface';
 import App from './app';
 import GameHandler from './modules/game/handlers/game.handler';
+import HTTPServer from './shared/utils/HTTPServer';
+import SocketIOServer from './shared/utils/SocketIOServer';
+import SocketHandlerManager from './shared/socketHandlerManager/socketHandlerManager';
 
 const sharedContainerModule: ContainerModule = new ContainerModule(
 	(options: ContainerModuleLoadOptions) => {
@@ -29,10 +32,15 @@ const sharedContainerModule: ContainerModule = new ContainerModule(
 		// 	.toDynamicValue(() => {
 		// 		throw new Error('Socket.IO server not initialized!');
 		// 	});
-		// options
-		// 	.bind<SocketHandlerManager>(TYPES.SocketHandlerManager)
-		// 	.to(SocketHandlerManager);
+		options
+			.bind<SocketHandlerManager>(TYPES.SocketHandlerManager)
+			.to(SocketHandlerManager);
 		options.bind<GameHandler>(TYPES.GameHandler).to(GameHandler);
+		options.bind<HTTPServer>(TYPES.HTTPServer).to(HTTPServer).inSingletonScope();
+		options
+			.bind<SocketIOServer>(TYPES.SocketIOServer)
+			.to(SocketIOServer)
+			.inSingletonScope();
 	},
 );
 

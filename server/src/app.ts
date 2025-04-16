@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
-import express, { Express, json } from 'express';
-import { createServer, Server } from 'http';
+import { Express, json } from 'express';
+import { Server } from 'http';
 import { inject, injectable } from 'inversify';
 import { Server as SocketServer } from 'socket.io';
 import TYPES from './container-types';
@@ -8,12 +7,12 @@ import { IExceptionFilter } from './shared/exceptionFilter/exception.filter.inte
 import { ILoggerService } from './shared/logger/logger.service.interface';
 import IGameController from './modules/game/controllers/game.controller.interface';
 import cookieParser from 'cookie-parser';
-// import appContainer from './container';
-// import SocketHandlerManagerWrapper from './shared/socketHandlerManager/socketHandlerManagerWrapper';
-import GameHandler from './modules/game/handlers/game.handler';
 import appContainer from './container';
 import SocketHandlerManager from './shared/socketHandlerManager/socketHandlerManager';
 import { instrument } from '@socket.io/admin-ui';
+import HTTPServer from './shared/utils/HTTPServer';
+import SocketIOServer from './shared/utils/SocketIOServer';
+import GameHandler from './modules/game/handlers/game.handler';
 
 @injectable()
 export default class App {
@@ -26,23 +25,13 @@ export default class App {
 		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
 		@inject(TYPES.ExceptionFilter) private readonly exceptionFilter: IExceptionFilter,
 		@inject(TYPES.GameController) private readonly gameController: IGameController,
-		// @inject(TYPES.GameHandler) private readonly gameHandler: GameHandler,
+		@inject(TYPES.HTTPServer) httpServer: HTTPServer,
+		@inject(TYPES.SocketIOServer) socketServer: SocketIOServer,
+		@inject(TYPES.GameHandler) private readonly gameHandler: GameHandler,
 	) {
-		this.app = express();
-		this.httpServer = createServer(this.app);
-		this.io = new SocketServer(this.httpServer, {
-			cors: {
-				origin: ['https://admin.socket.io'],
-				// ["https://admin.socket.io"],
-				credentials: true,
-			},
-		});
-
-		appContainer
-			.bind<SocketHandlerManager>(TYPES.SocketHandlerManager)
-			.toConstantValue(new SocketHandlerManager(this.io));
-
-		appContainer.get<GameHandler>(TYPES.GameHandler);
+		this.app = httpServer.app;
+		this.httpServer = httpServer.server;
+		this.io = socketServer.io;
 	}
 
 	useHTTPMiddlewares(): void {

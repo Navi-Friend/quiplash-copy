@@ -7,6 +7,5 @@ export default interface ISocketRoute {
 	middlewares?: ISocketMiddleware[];
 	except?: string;
 	rooms?: string[];
-	// event: string;
 	func: (socket: Socket, next?: NextFunction) => void;
 }

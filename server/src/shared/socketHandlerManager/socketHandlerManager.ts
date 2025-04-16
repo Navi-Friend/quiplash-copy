@@ -1,13 +1,15 @@
 import { Namespace, Server, Socket } from 'socket.io';
 import ISocketHandlerManager from './socketHandlerManager.interface';
 import ISocketRoute from './socketRoute.interface';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import TYPES from '../../container-types';
+import SocketIOServer from '../utils/SocketIOServer';
 
 @injectable()
 export default class SocketHandlerManager implements ISocketHandlerManager {
 	private _io: Server;
-	constructor(io: Server) {
-		this._io = io;
+	constructor(@inject(TYPES.SocketIOServer) socketServer: SocketIOServer) {
+		this._io = socketServer.io;
 		console.log('SocketHandler created');
 	}
 
@@ -51,7 +53,7 @@ export default class SocketHandlerManager implements ISocketHandlerManager {
 	private bindFunc(route: ISocketRoute, server: Server | Namespace): void {
 		console.log('func');
 
-		server.on('connection', route.func)
+		server.on('connection', route.func);
 	}
 
 	bindRoutes(routes: ISocketRoute[]) {

@@ -5,7 +5,8 @@ const TYPES = {
 	GameController: Symbol.for('GameController'),
 	GameService: Symbol.for('GameService'),
 	SocketHandlerManager: Symbol.for('SocketHandlerManager'),
-	// SocketIOServer: Symbol.for('SocketIOServer'),
 	GameHandler: Symbol.for('GameHandler'),
+	HTTPServer: Symbol.for('HTTPServer'),
+	SocketIOServer: Symbol.for('SocketIOServer'),
 };
 export default TYPES;
