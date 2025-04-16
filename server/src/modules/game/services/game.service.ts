@@ -1,5 +1,5 @@
 import redisClient from '../../../shared/redis/redis.service';
-import VIPPlayer from '../../player/entities/VIPPlayer.entity';
+import VIPPlayer from '../entities/player/VIPPlayer.entity';
 import Game from '../entities/game.entity';
 import IGameService from './game.service.interface';
 import { injectable } from 'inversify';

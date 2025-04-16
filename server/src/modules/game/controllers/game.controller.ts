@@ -1,10 +1,10 @@
 import { inject, injectable } from 'inversify';
 import TYPES from '../../../container-types';
-import BaseHTTPController from '../../../shared/HTTPController/baseController.service';
+import BaseHTTPController from '../../../shared/HTTPController/base.controller';
 import { ILoggerService } from '../../../shared/logger/logger.service.interface';
 import { NextFunction, Response, Request } from 'express';
 import IGameController from './game.controller.interface';
-import AuthPlayer from '../../player/middlewares/authPlayer.middleware';
+import AuthPlayer from '../middlewares/authPlayer.middleware';
 import IGameService from '../services/game.service.interface';
 
 @injectable()
@@ -30,7 +30,7 @@ export default class GameController
 	async initGame(req: Request, res: Response, next: NextFunction): Promise<void> {
 		if (!req.authenticated) {
 			this.gameService.initGame(req.body.playerName)
-			io init socket room
+			// io init socket room
 
 		}
 		res.send(200)

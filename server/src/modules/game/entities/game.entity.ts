@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import VIPPlayer from '../../player/entities/VIPPlayer.entity';
+import VIPPlayer from './player/VIPPlayer.entity';
 
 export default class Game {
 	private _gameId: string;

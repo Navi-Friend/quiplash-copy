@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import IBaseHTTPController from './baseController.interface';
+import IBaseHTTPController from './base.controller.interface';
 import IHTTPRoute from './route.interface';
 import { inject, injectable } from 'inversify';
 import TYPES from '../../container-types';
@@ -7,9 +7,13 @@ import { ILoggerService } from '../logger/logger.service.interface';
 
 @injectable()
 export default abstract class BaseHTTPController implements IBaseHTTPController {
-	router: Router;
+	private _router: Router;
 	constructor(@inject(TYPES.LoggerService) protected readonly logger: ILoggerService) {
-		this.router = Router();
+		this._router = Router();
+	}
+
+	get router() {
+		return this._router;
 	}
 
 	bindRoutes(routes: IHTTPRoute[]): void {

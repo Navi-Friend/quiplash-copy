@@ -1,6 +1,5 @@
 import { Container, ContainerModule, ContainerModuleLoadOptions } from 'inversify';
 import TYPES from './container-types';
-import App from './app';
 import { IExceptionFilter } from './shared/exceptionFilter/exception.filter.interface';
 import { ExceptionFilter } from './shared/exceptionFilter/exception.filter';
 import { ILoggerService } from './shared/logger/logger.service.interface';
@@ -9,10 +8,12 @@ import IGameController from './modules/game/controllers/game.controller.interfac
 import GameController from './modules/game/controllers/game.controller';
 import GameService from './modules/game/services/game.service';
 import IGameService from './modules/game/services/game.service.interface';
+import App from './app';
+import GameHandler from './modules/game/handlers/game.handler';
 
 const sharedContainerModule: ContainerModule = new ContainerModule(
 	(options: ContainerModuleLoadOptions) => {
-		options.bind<App>(TYPES.App).to(App).inSingletonScope();
+		options.bind<App>(TYPES.App).to(App);
 		options
 			.bind<IExceptionFilter>(TYPES.ExceptionFilter)
 			.to(ExceptionFilter)
@@ -23,6 +24,15 @@ const sharedContainerModule: ContainerModule = new ContainerModule(
 			.inSingletonScope();
 		options.bind<IGameController>(TYPES.GameController).to(GameController);
 		options.bind<IGameService>(TYPES.GameService).to(GameService);
+		// options
+		// 	.bind<SocketHandlerManagerWrapper>(TYPES.SocketIOServer)
+		// 	.toDynamicValue(() => {
+		// 		throw new Error('Socket.IO server not initialized!');
+		// 	});
+		// options
+		// 	.bind<SocketHandlerManager>(TYPES.SocketHandlerManager)
+		// 	.to(SocketHandlerManager);
+		options.bind<GameHandler>(TYPES.GameHandler).to(GameHandler);
 	},
 );
 
