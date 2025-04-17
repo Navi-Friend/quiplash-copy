@@ -8,17 +8,16 @@ export default class GameHandler {
 	constructor(
 		@inject(TYPES.SocketHandlerManager) private manager: ISocketHandlerManager,
 	) {
-		console.log('asdfasdfsdafsadfasdf');
 		this.manager.bindRoutes([
 			{
-				func: this.handler.bind(this),
-				namespace: '/a',
+				func: this.handler,
+				namespace: '/',
 			},
 		]);
 	}
 
-	handler(socket: Socket) {
-		socket.on('asdf', () => {
+	handler(socket: Socket): void {
+		socket.on('joinRoom', () => {
 			console.log('asdf');
 			socket.emit('echo-asdf');
 		});

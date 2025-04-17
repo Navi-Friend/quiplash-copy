@@ -1,4 +1,4 @@
-import { v4 as uuid4 } from 'uuid';
+import { v4 as uuid4, UUIDTypes } from 'uuid';
 import IPlayer from './player.entity.interface';
 
 export default class Player implements IPlayer {
@@ -10,11 +10,11 @@ export default class Player implements IPlayer {
 		this._name = name;
 	}
 
-	get name() {
+	get name(): string {
 		return this._name;
 	}
 
-	get playerId() {
+	get playerId(): string {
 		return this._playerId;
 	}
 }

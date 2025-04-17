@@ -12,7 +12,7 @@ export default abstract class BaseHTTPController implements IBaseHTTPController 
 		this._router = Router();
 	}
 
-	get router() {
+	get router(): Router {
 		return this._router;
 	}
 

@@ -74,9 +74,6 @@ export class LoggerService implements ILoggerService {
 	}
 
 	log(level: LogLevel, message: string, context: unknown): void {
-		this.logger.log(
-			level,
-			`[${context?.constructor?.name ?? 'Global'}] ${message}`,
-		);
+		this.logger.log(level, `[${context?.constructor?.name ?? 'Global'}] ${message}`);
 	}
 }

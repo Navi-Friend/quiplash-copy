@@ -7,16 +7,9 @@ import TYPES from '../../container-types';
 
 @injectable()
 export class ExceptionFilter implements IExceptionFilter {
-	constructor(
-		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
-	) {}
+	constructor(@inject(TYPES.LoggerService) private readonly logger: ILoggerService) {}
 
-	catch(
-		err: Error | HTTPError,
-		req: Request,
-		res: Response,
-		next: NextFunction,
-	): void {
+	catch(err: Error | HTTPError, req: Request, res: Response, next: NextFunction): void {
 		if (err instanceof HTTPError) {
 			this.logger.error(
 				JSON.stringify({ ...err, ...err.getServiceInfo() }, null, 2),

@@ -1,4 +1,4 @@
-import { Namespace, Server, Socket } from 'socket.io';
+import { Namespace, Server } from 'socket.io';
 import ISocketHandlerManager from './socketHandlerManager.interface';
 import ISocketRoute from './socketRoute.interface';
 import { inject, injectable } from 'inversify';
@@ -13,7 +13,7 @@ export default class SocketHandlerManager implements ISocketHandlerManager {
 		console.log('SocketHandler created');
 	}
 
-	get io() {
+	get io(): Server {
 		return this._io;
 	}
 
@@ -56,7 +56,7 @@ export default class SocketHandlerManager implements ISocketHandlerManager {
 		server.on('connection', route.func);
 	}
 
-	bindRoutes(routes: ISocketRoute[]) {
+	bindRoutes(routes: ISocketRoute[]): void {
 		for (const route of routes) {
 			const orderNamespace = this.bindNamespace(route, this._io);
 			this.bindMiddlewares(route, orderNamespace);

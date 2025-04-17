@@ -1,5 +1,5 @@
 import { NextFunction } from 'express';
-import { Socket, Namespace } from 'socket.io';
+import { Socket } from 'socket.io';
 import ISocketMiddleware from '../middlewares/SocketMiddleware.interface';
 
 export default interface ISocketRoute {

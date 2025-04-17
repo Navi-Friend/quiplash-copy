@@ -25,7 +25,7 @@ export class AppError extends Error implements IAppError {
 		};
 	}
 
-	getServiceInfo() {
+	getServiceInfo(): object {
 		return {
 			...(this.cause && {
 				cause:

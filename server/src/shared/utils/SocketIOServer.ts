@@ -1,5 +1,4 @@
 import { Server } from 'socket.io';
-import { Server as httpServer } from 'http';
 import { inject, injectable } from 'inversify';
 import TYPES from '../../container-types';
 import HTTPServer from './HTTPServer';
@@ -18,7 +17,7 @@ export default class SocketIOServer {
 		});
 	}
 
-	get io() {
+	get io(): Server {
 		return this._io;
 	}
 }

@@ -27,14 +27,10 @@ const sharedContainerModule: ContainerModule = new ContainerModule(
 			.inSingletonScope();
 		options.bind<IGameController>(TYPES.GameController).to(GameController);
 		options.bind<IGameService>(TYPES.GameService).to(GameService);
-		// options
-		// 	.bind<SocketHandlerManagerWrapper>(TYPES.SocketIOServer)
-		// 	.toDynamicValue(() => {
-		// 		throw new Error('Socket.IO server not initialized!');
-		// 	});
 		options
 			.bind<SocketHandlerManager>(TYPES.SocketHandlerManager)
-			.to(SocketHandlerManager);
+			.to(SocketHandlerManager)
+			.inSingletonScope();
 		options.bind<GameHandler>(TYPES.GameHandler).to(GameHandler);
 		options.bind<HTTPServer>(TYPES.HTTPServer).to(HTTPServer).inSingletonScope();
 		options

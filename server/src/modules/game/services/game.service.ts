@@ -20,6 +20,6 @@ export default class GameService implements IGameService {
 		const vip = new VIPPlayer(playerName);
 		const game = new Game(vip);
 
-		redisClient.set('VIPPlayer', playerName);
+		await redisClient.set('VIPPlayer', playerName);
 	}
 }

@@ -6,7 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"test": "test",
-		"dev": "nodemon --exec \"tsx\" src/index.ts",
+		"dev": "nodemon",
+		"dev:inspect": "nodemon -e ts,json --exec node --inspect --import tsx ./src/index.ts",
 		"lint": "eslint"
 	},
 	"author": "Ivan Konovalov",

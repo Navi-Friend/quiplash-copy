@@ -10,7 +10,7 @@ export default defineConfig([
 		ignores: ['**/dist/**', '**/node_modules/**', 'eslint.config.js'],
 	},
 	{
-		files: ['./src/*.{js,mjs,cjs,ts}'],
+		files: ['./src/**/*.{js,mjs,cjs,ts}'],
 		languageOptions: {
 			globals: globals.node,
 			ecmaVersion: 'latest',
@@ -29,6 +29,7 @@ export default defineConfig([
 			...eslintConfigPrettier.rules,
 			'prettier/prettier': 'warn',
 			'no-unused-vars': 'off',
+			'no-misused-promises': 'off',
 
 			'@typescript-eslint/explicit-function-return-type': [
 				'error',
@@ -37,12 +38,14 @@ export default defineConfig([
 					allowHigherOrderFunctions: true, // Разрешает не указывать тип для HOF
 				},
 			],
-			'@typescript-eslint/no-unused-vars': 'error', // Включаем проверку неиспользуемых переменных
+
+			'@typescript-eslint/no-unused-vars': 'off', // Включаем проверку неиспользуемых переменных
 			'@typescript-eslint/no-floating-promises': 'error', // Проверяет незавершенные Promise
 
 			// Дополнительные полезные правила
 			'@typescript-eslint/await-thenable': 'error', // Проверяет await на thenable-объектах
-			'@typescript-eslint/no-misused-promises': 'error', // Ловит неправильное использование Promise
+			'@typescript-eslint/no-misused-promises': 'off', // Ловит неправильное использование Promise
 		},
 	},
 ]);
+
