@@ -1,10 +1,10 @@
 import { Server } from 'socket.io';
 import { inject, injectable } from 'inversify';
-import TYPES from '../../container-types';
-import HTTPServer from './HTTPServer';
+import TYPES from '../../IoC-types';
+import { HTTPServer } from './HTTPServer';
 
 @injectable()
-export default class SocketIOServer {
+export class SocketServer {
 	private _io: Server;
 
 	constructor(@inject(TYPES.HTTPServer) httpServer: HTTPServer) {

@@ -2,7 +2,7 @@ import { ILoggerService, LogLevel } from './logger.service.interface';
 import { injectable } from 'inversify';
 import winston, { createLogger, Logger } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import config from './logger.config';
+import { config } from './logger.config';
 import path from 'path';
 
 @injectable()

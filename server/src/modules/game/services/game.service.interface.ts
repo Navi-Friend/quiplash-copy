@@ -1,3 +1,5 @@
-export default interface IGameService {
-	initGame(playerName: string): Promise<void>;
+import { GameModel } from '../models/game.model';
+
+export interface IGameService {
+	initGame(): Promise<GameModel>;
 }

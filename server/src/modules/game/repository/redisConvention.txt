@@ -1,0 +1,11 @@
+database name - singular: game, round...
+"column" name - plural: game:players
+
+types:
+game:{gameId} -> Hash
+game:{gameId}:players -> Set
+game:{gameId}:rounds -> List
+
+player:{playerId} -> Hash
+
+round:{roundId} -> Hash

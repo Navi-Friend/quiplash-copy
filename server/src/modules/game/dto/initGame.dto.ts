@@ -1,3 +1,3 @@
-export default interface InitGameDTO {
+export interface InitGameDTO {
 	playerName: string;
 }

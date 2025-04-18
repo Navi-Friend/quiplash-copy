@@ -1,37 +1,46 @@
 import { v4 as uuidv4 } from 'uuid';
-import VIPPlayer from './player/VIPPlayer.entity';
+import { VIPPlayer } from './player/VIPPlayer.entity';
 import { MAX_ACTIVE_PLAYERS, ROUNDS_NUMBER } from '../constants';
+import { AppError } from '../../../shared/errors/app/app.error';
 
-export default class Game {
+export class Game {
 	private _gameId: string;
-	private _VIPPlayer: VIPPlayer;
-	private _roomCode: string;
+	private _VIPPlayer: VIPPlayer | undefined;
+	private _gameCode: string;
 
-	rounds: Round[] = ROUNDS_NUMBER;
-	currentRound: Round;
+	totalRounds: number = ROUNDS_NUMBER;
+	currentRound: number;
 	players: Player[];
 	maxPlayers: number = MAX_ACTIVE_PLAYERS;
 	spectators?: Spectator[];
 
-	constructor(vip: VIPPlayer) {
-		this._roomCode = this.generateCode();
+	constructor() {
+		this._gameCode = this.generateGameCode();
 		this._gameId = uuidv4();
-		this._VIPPlayer = vip;
+		this.currentRound = 0;
 	}
 
-	private generateCode(): string {
+	private generateGameCode(): string {
 		return Math.random().toString(36).substring(2, 6).toUpperCase();
 	}
 
-	get roomCode(): string {
-		return this._roomCode;
+	get gameCode(): string {
+		return this._gameCode;
 	}
 
 	get gameId(): string {
 		return this._gameId;
 	}
 
-	get VIPPlayer(): VIPPlayer {
+	get VIPPlayer(): VIPPlayer | undefined {
 		return this._VIPPlayer;
+	}
+
+	set VIPPlayer(vip: VIPPlayer) {
+		if (!this._VIPPlayer) {
+			this._VIPPlayer = vip;
+		} else {
+			throw new AppError('VIP Player has already set');
+		}
 	}
 }

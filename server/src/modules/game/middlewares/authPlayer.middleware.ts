@@ -1,11 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
-import IHTTPMiddleware from '../../../shared/middlewares/HTTPmiddleware.interface';
+import {
+	ISocketMiddleware,
+	ISocketIONextFN,
+} from '../../../shared/middlewares/socket.middleware.interface';
+import { Socket } from 'socket.io';
 
-export default class AuthPlayer implements IHTTPMiddleware {
-	async execute(req: Request, res: Response, next: NextFunction): Promise<void> {
-		const cookies = req.cookies;
-		if (cookies?.gameId && cookies?.roomId) {
-			req.authenticated = true;
+export class AuthPlayer implements ISocketMiddleware {
+	execute(socket: Socket, next: ISocketIONextFN): void {
+		const data = socket.data;
+		if (data?.gameId && data?.roomId) {
+			data.authenticated = true;
 			next();
 		}
 	}

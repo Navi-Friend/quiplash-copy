@@ -1,5 +1,5 @@
 import { Router } from 'express';
 
-export default interface IBaseHTTPController {
+export interface IBaseHTTPController {
 	router: Router;
 }

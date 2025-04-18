@@ -2,7 +2,7 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-export default {
+export const config = {
 	level: (process.env.NODE_ENV ?? 'development' === 'development') ? 'debug' : 'warn',
 	dir: process.env.LOG_DIR ?? path.join(__dirname, '../../../logs'),
 	levels: {

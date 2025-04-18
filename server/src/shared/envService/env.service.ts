@@ -1,1 +1,1 @@
-export default class EnvService {}
+export class EnvService {}

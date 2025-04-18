@@ -3,7 +3,7 @@ import { ILoggerService } from '../logger/logger.service.interface';
 import { NextFunction, Request, Response } from 'express';
 import { HTTPError } from '../errors/http/HTTP.error';
 import { IExceptionFilter } from './exception.filter.interface';
-import TYPES from '../../container-types';
+import TYPES from '../../IoC-types';
 
 @injectable()
 export class ExceptionFilter implements IExceptionFilter {

@@ -1,25 +1,19 @@
-import redisClient from '../../../shared/redis/redis.service';
-import VIPPlayer from '../entities/player/VIPPlayer.entity';
-import Game from '../entities/game.entity';
-import IGameService from './game.service.interface';
-import { injectable } from 'inversify';
+import { Game } from '../entities/game.entity';
+import { IGameService } from './game.service.interface';
+import { inject, injectable } from 'inversify';
+import TYPES from '../../../IoC-types';
+import { IGameRepository } from '../repository/game.repository.interface';
+import { GameModel } from '../models/game.model';
 
 @injectable()
-export default class GameService implements IGameService {
-	constructor() {}
+export class GameService implements IGameService {
+	constructor(
+		@inject(TYPES.GameRepository) private readonly gameRepository: IGameRepository,
+	) {}
 
-	// async registerPlayer(req: Request, res: Response, next: NextFunction): Promise<void> {
+	async initGame(): Promise<GameModel> {
+		const game = new Game();
 
-	// }
-
-	async initGame(playerName: string): Promise<void> {
-		const isUniqueName = (await redisClient.get(playerName)) == null;
-		if (!isUniqueName) {
-			throw new Error();
-		}
-		const vip = new VIPPlayer(playerName);
-		const game = new Game(vip);
-
-		await redisClient.set('VIPPlayer', playerName);
+		return await this.gameRepository.setGame(game);
 	}
 }

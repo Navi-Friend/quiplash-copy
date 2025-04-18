@@ -3,7 +3,7 @@ import express, { Express } from 'express';
 import { injectable } from 'inversify';
 
 @injectable()
-export default class HTTPServer {
+export class HTTPServer {
 	private _app: Express;
 	private _server: Server;
 
