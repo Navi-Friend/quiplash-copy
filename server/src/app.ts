@@ -3,7 +3,6 @@ import { Server } from 'http';
 import { inject, injectable } from 'inversify';
 import { Server as IOServer } from 'socket.io';
 import TYPES from './IoC-types';
-import { IExceptionFilter } from './shared/exceptionFilter/exception.filter.interface';
 import { ILoggerService } from './shared/logger/logger.service.interface';
 import cookieParser from 'cookie-parser';
 import { instrument } from '@socket.io/admin-ui';
@@ -21,7 +20,6 @@ export class App {
 
 	constructor(
 		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
-		@inject(TYPES.ExceptionFilter) private readonly exceptionFilter: IExceptionFilter,
 		@inject(TYPES.HTTPServer) httpServer: HTTPServer,
 		@inject(TYPES.SocketServer) socketServer: SocketServer,
 		@inject(TYPES.SocketControllersFactory)
@@ -38,15 +36,15 @@ export class App {
 		this.app.use(json());
 	}
 
-	useExceptionFilters(): void {
-		this.app.use(this.exceptionFilter.catch.bind(this.exceptionFilter));
-	}
+	// useExceptionFilters(): void {
+	// 	this.io.use(this.socketExceptionFilter.catch.bind(this.socketExceptionFilter));
+	// }
 
 	public async init(): Promise<void> {
 		await this.redisService.connect();
 		this.socketControllersFactory.init();
 		this.useHTTPMiddlewares();
-		this.useExceptionFilters();
+		// this.useExceptionFilters();
 		this.httpServer.listen(this.port, () => {
 			this.logger.info(`Server started on ${this.port}`, this);
 		});

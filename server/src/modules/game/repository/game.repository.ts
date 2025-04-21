@@ -1,14 +1,17 @@
 import { inject, injectable } from 'inversify';
 import TYPES from '../../../IoC-types';
 import { RedisService } from '../../../shared/redis/redis.service';
-import { Game } from '../entities/game.entity';
+import { Game } from '../entities/game/game.entity';
 import { GameModel } from '../models/game.model';
 import { AppError } from '../../../shared/errors/app/app.error';
+import { GameStatus } from '../entities/game/gameStatus';
+import { ILoggerService } from '../../../shared/logger/logger.service.interface';
 
 @injectable()
 export class GameRepository {
 	constructor(
 		@inject(TYPES.RedisService) private readonly redisService: RedisService,
+		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
 	) {}
 
 	async setGame(game: Game): Promise<GameModel> {
@@ -19,15 +22,17 @@ export class GameRepository {
 				totalRounds: game.totalRounds,
 				currentRound: game.currentRound,
 				maxPlayers: game.maxPlayers,
+				gameStatus: game.gameStatus,
 			};
 
-			console.log(gameModel);
 			await this.redisService.redis.hSet(
 				`game:${game.gameId}`,
 				this.toRedisHash(gameModel),
 			);
+			this.logger.debug('Game is set to redis', this);
 			return gameModel;
 		} catch (error) {
+			this.logger.error('Game is not set to redis', this);
 			throw new AppError('Error while set game to redis', error as Error);
 		}
 
@@ -39,8 +44,10 @@ export class GameRepository {
 	async getGame(gameId: string): Promise<GameModel | null> {
 		try {
 			const plainGame = await this.redisService.redis.hGetAll(`game:${gameId}`);
+			this.logger.debug('Game is gotten from redis', this);
 			return this.fromRedisHash(plainGame);
 		} catch (error) {
+			this.logger.error('Game is not gotten from redis', this);
 			throw new AppError('Error while get game to redis', error as Error);
 		}
 	}
@@ -63,6 +70,7 @@ export class GameRepository {
 					totalRounds: parseInt(data.totalRounds),
 					currentRound: parseInt(data.currentRound),
 					maxPlayers: parseInt(data.maxPlayers),
+					gameStatus: data.gameStatus as GameStatus,
 				}
 			: null;
 	}

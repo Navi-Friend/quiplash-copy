@@ -1,4 +1,4 @@
-import { Game } from '../entities/game.entity';
+import { Game } from '../entities/game/game.entity';
 import { GameModel } from '../models/game.model';
 
 export interface IGameRepository {

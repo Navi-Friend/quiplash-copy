@@ -1,5 +1,6 @@
-import { VIPPlayerModel } from '../models/VIPPlayer.model';
+import { Game } from '../entities/game/game.entity';
+import { VIPPlayer } from '../entities/player/VIPPlayer.entity';
 
 export interface IPlayerService {
-	addVIPPlayer: (gameId: string, name: string) => Promise<VIPPlayerModel | null>;
+	createVIPPlayer: (gameId: string, name: string) => Promise<VIPPlayer>;
 }

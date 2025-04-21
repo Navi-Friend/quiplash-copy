@@ -22,7 +22,6 @@ export class RedisService {
 	async connect(): Promise<void> {
 		try {
 			await this.redis.connect();
-			
 		} catch (error) {
 			console.log('Reidis connection error');
 		}

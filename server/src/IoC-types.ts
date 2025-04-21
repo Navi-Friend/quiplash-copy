@@ -1,6 +1,6 @@
 const TYPES = {
 	App: Symbol.for('Application'),
-	ExceptionFilter: Symbol.for('ExceptionFilter'),
+	SocketExceptionFilter: Symbol.for('SocketExceptionFilter'),
 	LoggerService: Symbol.for('LoggerService'),
 	HTTPServer: Symbol.for('HTTPServer'),
 	SocketServer: Symbol.for('SocketServer'),

@@ -1,7 +1,6 @@
 import { Container, ContainerModule, ContainerModuleLoadOptions } from 'inversify';
 import TYPES from './IoC-types';
-import { IExceptionFilter } from './shared/exceptionFilter/exception.filter.interface';
-import { ExceptionFilter } from './shared/exceptionFilter/exception.filter';
+import { ISocketExceptionFilter } from './shared/exceptionFilter/socketException.filter.interface';
 import { ILoggerService } from './shared/logger/logger.service.interface';
 import { LoggerService } from './shared/logger/logger.service';
 import { GameService } from './modules/game/services/game.service';
@@ -19,13 +18,14 @@ import { IPlayerRepository } from './modules/game/repository/player.repository.i
 import { PlayerRepository } from './modules/game/repository/player.repository';
 import { IPlayerService } from './modules/game/services/player.service.interface';
 import { PlayerService } from './modules/game/services/player.service';
+import { SocketExceptionFilter } from './shared/exceptionFilter/socketException.filter';
 
 const sharedContainerModule = new ContainerModule(
 	(options: ContainerModuleLoadOptions) => {
 		options.bind<App>(TYPES.App).to(App);
 		options
-			.bind<IExceptionFilter>(TYPES.ExceptionFilter)
-			.to(ExceptionFilter)
+			.bind<ISocketExceptionFilter>(TYPES.SocketExceptionFilter)
+			.to(SocketExceptionFilter)
 			.inSingletonScope();
 		options
 			.bind<ILoggerService>(TYPES.LoggerService)

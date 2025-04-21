@@ -2,10 +2,6 @@ database name - singular: game, round...
 "column" name - plural: game:players
 
 types:
-game:{gameId} -> Hash
-game:{gameId}:players -> Set
-game:{gameId}:rounds -> List
-
-player:{playerId} -> Hash
-
-round:{roundId} -> Hash
+game:{gameId} -> Hash  PK -- gameId
+game:{gameId}:players -> Hash  PK -- name
+game:{gameId}:rounds -> Hash  PK -- gameId
