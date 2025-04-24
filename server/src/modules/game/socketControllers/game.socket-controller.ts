@@ -8,6 +8,8 @@ import { IPlayerService } from '../services/player.service.interface';
 import { EVENTS } from '../events';
 import { ValidateMiddleware } from '../middlewares/validation.middleware';
 import { ILoggerService } from '../../../shared/logger/logger.service.interface';
+import { JoinGameDTO } from '../dto/joinGame.dto';
+import { SocketExceptionFilter } from '../../../shared/exceptionFilter/socketException.filter';
 
 @injectable()
 export class GameSocketController implements ISocketController {
@@ -17,8 +19,11 @@ export class GameSocketController implements ISocketController {
 		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
 	) {}
 	registerHandlers(socket: Socket, io: Server): void {
-		socket.on(EVENTS.initGame, (data: InitGameDTO, callback) =>
+		socket.on(EVENTS.initGame, (data: InitGameDTO, callback: Functino) =>
 			this.handleInitGame(socket, io, data, callback),
+		);
+		socket.on(EVENTS.joinGame, (data: JoinGameDTO, callback: Function) =>
+			this.handleJoinGame(socket, io, data, callback),
 		);
 	}
 
@@ -37,11 +42,35 @@ export class GameSocketController implements ISocketController {
 		try {
 			let [game, vip] = await this.gameService.initGame(data);
 
-			await socket.join(game.gameId);
+			await socket.join(game.gameCode);
 
 			callback({ status: 'OK', data: { game, vip } });
 		} catch (error) {
-			callback({ status: '!OK', erros: error });
+			callback({ status: '!OK', errors: error });
+		}
+	}
+
+	async handleJoinGame(
+		socket: Socket,
+		io: Server,
+		data: JoinGameDTO,
+		callback: Function,
+	): Promise<void> {
+		const errors = await ValidateMiddleware.validateDTO(JoinGameDTO, data);
+		if (errors.length) {
+			callback({ status: '!OK', errors });
+			this.logger.error(`Validation data error: ${errors}`, this);
+			return;
+		}
+		try {
+			console.log(data);
+			const [player, players] = await this.playerService.addPlayer(data);
+
+			await socket.join(data.gameCode);
+			io.in(data.gameCode).emit(EVENTS.playerJoined, { players });
+			callback({ status: 'OK', data: { player } });
+		} catch (error) {
+			callback({ status: '!OK', errors: error });
 		}
 	}
 }

@@ -49,8 +49,14 @@ const sharedContainerModule = new ContainerModule(
 const gameContainerModule = new ContainerModule((options: ContainerModuleLoadOptions) => {
 	options.bind<ISocketController>(TYPES.SocketController).to(GameSocketController);
 	options.bind<IGameService>(TYPES.GameService).to(GameService);
-	options.bind<IGameRepository>(TYPES.GameRepository).to(GameRepository);
-	options.bind<IPlayerRepository>(TYPES.PlayerRepository).to(PlayerRepository);
+	options
+		.bind<IGameRepository>(TYPES.GameRepository)
+		.to(GameRepository)
+		.inSingletonScope();
+	options
+		.bind<IPlayerRepository>(TYPES.PlayerRepository)
+		.to(PlayerRepository)
+		.inSingletonScope();
 	options.bind<IPlayerService>(TYPES.PlayerService).to(PlayerService);
 });
 

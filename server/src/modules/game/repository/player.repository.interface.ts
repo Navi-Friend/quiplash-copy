@@ -1,7 +1,12 @@
+import { Player } from '../entities/player/player.entity';
 import { VIPPlayer } from '../entities/player/VIPPlayer.entity';
-import { VIPPlayerModel } from '../models/VIPPlayer.model';
+import { PlayerModel } from '../models/player.model';
 
 export interface IPlayerRepository {
-	setVIPPlayer(gameid: string, vip: VIPPlayer): Promise<VIPPlayerModel>;
-	getVIPPlayerByName(gameId: string, name: string): Promise<VIPPlayerModel | null>;
+	setVIPPlayer(gameCode: string, vip: VIPPlayer): Promise<PlayerModel>;
+	getVIPPlayer(gameCode: string, name: string): Promise<PlayerModel | null>;
+
+	setPlayer(gameCode: string, player: Player): Promise<PlayerModel>;
+	getPlayer(gameCode: string, name: string): Promise<PlayerModel | null>;
+	getPlayers(gameCode: string): Promise<PlayerModel[] | null>;
 }

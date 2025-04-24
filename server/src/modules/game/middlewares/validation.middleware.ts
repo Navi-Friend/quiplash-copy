@@ -10,6 +10,7 @@ export class ValidateMiddleware {
 		let errors: Error[] = [];
 		if (!data) {
 			errors.push(new AppValidationError('Data is not provided', data || {}));
+			return errors;
 		}
 		const instance = plainToClass(dtoClass, data);
 		const classValidatorErrors = await validate(instance);

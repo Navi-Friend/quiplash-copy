@@ -7,7 +7,7 @@ import { GameModel } from '../models/game.model';
 import { IPlayerService } from './player.service.interface';
 import { InitGameDTO } from '../dto/initGame.dto';
 import { IPlayerRepository } from '../repository/player.repository.interface';
-import { VIPPlayerModel } from '../models/VIPPlayer.model';
+import { PlayerModel } from '../models/player.model';
 
 @injectable()
 export class GameService implements IGameService {
@@ -20,16 +20,17 @@ export class GameService implements IGameService {
 
 	async initGame({
 		playerName,
-	}: InitGameDTO): Promise<[GameModel, VIPPlayerModel | null]> {
-		const game = new Game();
-		const vip = await this.playerService.createVIPPlayer(game.gameId, playerName);
-		game.VIPPlayer = vip;
+	}: InitGameDTO): Promise<[GameModel, PlayerModel | null]> {
+		const game = Game.createNew();
+		const vipModel = await this.playerService.createVIPPlayer(
+			game.gameCode,
+			playerName,
+		);
+		// game.VIPPlayer = vip;
+		game.addOnePlayer();
 
 		const gameModel = await this.gameRepository.setGame(game);
-		const vipModel = await this.playerRepository.getVIPPlayerByName(
-			game.gameId,
-			vip.name,
-		);
+
 		return [gameModel, vipModel];
 	}
 }

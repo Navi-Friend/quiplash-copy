@@ -5,11 +5,12 @@ import { AppError } from '../../../../shared/errors/app/app.error';
 export class Player implements IPlayer {
 	private _playerId: string;
 	private _name: string;
-	private _points: number = 0;
+	private _score: number;
 
 	constructor(name: string) {
 		this._playerId = uuid4();
 		this._name = name;
+		this._score = 0;
 	}
 
 	get name(): string {
@@ -20,15 +21,15 @@ export class Player implements IPlayer {
 		return this._playerId;
 	}
 
-	get points(): number {
-		return this._points;
+	get score(): number {
+		return this._score;
 	}
 
-	set points(points: number) {
-		if (points > 0) {
-			this._points = points;
+	set score(score: number) {
+		if (score > 0) {
+			this._score = score;
 		} else {
-			throw new AppError('Player points should be > 0');
+			throw new AppError('Player score should be > 0');
 		}
 	}
 }

@@ -1,6 +1,8 @@
-import { Game } from '../entities/game/game.entity';
+import { JoinGameDTO } from '../dto/joinGame.dto';
 import { VIPPlayer } from '../entities/player/VIPPlayer.entity';
+import { PlayerModel } from '../models/player.model';
 
 export interface IPlayerService {
-	createVIPPlayer: (gameId: string, name: string) => Promise<VIPPlayer>;
+	createVIPPlayer: (gameCode: string, name: string) => Promise<PlayerModel>;
+	addPlayer: (data: JoinGameDTO) => Promise<[PlayerModel, PlayerModel[]]>;
 }

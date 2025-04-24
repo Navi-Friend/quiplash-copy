@@ -2,29 +2,37 @@ import { inject, injectable } from 'inversify';
 import TYPES from '../../../IoC-types';
 import { RedisService } from '../../../shared/redis/redis.service';
 import { VIPPlayer } from '../entities/player/VIPPlayer.entity';
-import { VIPPlayerModel } from '../models/VIPPlayer.model';
 import { AppError } from '../../../shared/errors/app/app.error';
 import { IPlayerRepository } from './player.repository.interface';
 import { ILoggerService } from '../../../shared/logger/logger.service.interface';
+import { PlayerModel } from '../models/player.model';
+import { Player } from '../entities/player/player.entity';
+import { BaseRedisRepository } from '../../../shared/redis/base.repository';
 
 @injectable()
-export class PlayerRepository implements IPlayerRepository {
+export class PlayerRepository extends BaseRedisRepository implements IPlayerRepository {
+	private _isPlayersArrExists: boolean;
 	constructor(
 		@inject(TYPES.RedisService) private readonly redisService: RedisService,
 		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
-	) {}
+	) {
+		super();
+		this._isPlayersArrExists = false;
+	}
 
-	async setVIPPlayer(gameid: string, vip: VIPPlayer): Promise<VIPPlayerModel> {
+	async setVIPPlayer(gameCode: string, vip: VIPPlayer): Promise<PlayerModel> {
 		try {
-			const vipModel: VIPPlayerModel = {
+			const vipModel: PlayerModel = {
 				playerId: vip.playerId,
 				name: vip.name,
-				points: vip.points,
+				score: vip.score,
 			};
+
 			await this.redisService.redis.hSet(
-				`game:${gameid}:players:${vip.name}`,
-				this.toRedisHash(vipModel),
+				`game:${gameCode}:vip`,
+				this.modelToRedisHash(vipModel),
 			);
+
 			this.logger.debug('VIP is set to redis', this);
 			return vipModel;
 		} catch (error) {
@@ -33,40 +41,91 @@ export class PlayerRepository implements IPlayerRepository {
 		}
 	}
 
-	async getVIPPlayerByName(
-		gameId: string,
-		name: string,
-	): Promise<VIPPlayerModel | null> {
+	async getVIPPlayer(gameCode: string): Promise<PlayerModel | null> {
 		try {
 			const VIPPlain = await this.redisService.redis.hGetAll(
-				`game:${gameId}:players:${name}`,
+				`game:${gameCode}:vip`,
 			);
 
 			this.logger.debug('VIP is gotten from redis', this);
 
-			return this.fromRedisHash(VIPPlain);
+			return this.fromRedisHashToModel(VIPPlain);
 		} catch (error) {
 			this.logger.error('VIP is not gotten from redis', this);
-
 			throw new AppError('Error while get VIP Player', error as Error);
 		}
 	}
 
-	private toRedisHash(player: VIPPlayerModel): Record<string, string> {
-		return {
-			playerId: player.playerId,
-			name: player.name,
-			points: player.points.toString(),
-		};
+	async setPlayer(gameCode: string, player: Player): Promise<PlayerModel> {
+		try {
+			const playerModel: PlayerModel = {
+				playerId: player.playerId,
+				name: player.name,
+				score: player.score,
+			};
+			await this.createPlayersArrIfNotExists(gameCode);
+
+			await this.redisService.redis.json.arrAppend(
+				`game:${gameCode}:players`,
+				'$',
+				this.modelToRedisHash(playerModel),
+			);
+
+			this.logger.debug('Player is gotten from redis', this);
+
+			return playerModel;
+		} catch (error) {
+			this.logger.error('Player is not gotten from redis', this);
+			throw new AppError('Error while get player', error as Error);
+		}
 	}
 
-	private fromRedisHash(data: Record<string, string>): VIPPlayerModel | null {
+	async getPlayer(gameCode: string, name: string): Promise<PlayerModel | null> {
+		try {
+			const players = await this.getPlayers(gameCode);
+			if (!players) {
+				return null;
+			}
+			const player = players?.find((p) => p.name == name);
+
+			return player || null;
+		} catch (error) {
+			this.logger.error('Player is not gotten from redis', this);
+			throw new AppError('Error while get player', error as Error);
+		}
+	}
+
+	async getPlayers(gameCode: string): Promise<PlayerModel[] | null> {
+		try {
+			const playersPlain = (await this.redisService.redis.json.get(
+				`game:${gameCode}:players`,
+			)) as object[];
+
+			this.logger.debug('Players are gotten from redis', this);
+			if (playersPlain.length) {
+				return playersPlain as PlayerModel[];
+			}
+			return null;
+		} catch (error) {
+			this.logger.error('Players are not gotten from redis', this);
+			throw new AppError('Error while get player', error as Error);
+		}
+	}
+
+	private fromRedisHashToModel(data: Record<string, string>): PlayerModel | null {
 		return Object.keys(data).length != 0
 			? {
 					playerId: data.playerId,
 					name: data.name,
-					points: parseInt(data.points),
+					score: parseInt(data.points),
 				}
 			: null;
+	}
+
+	private async createPlayersArrIfNotExists(gameCode: string): Promise<void> {
+		if (!this._isPlayersArrExists) {
+			await this.redisService.redis.json.set(`game:${gameCode}:players`, '$', []);
+			this._isPlayersArrExists = true;
+		}
 	}
 }
