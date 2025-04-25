@@ -11,5 +11,6 @@ const TYPES = {
 	GameRepository: Symbol.for('GameRepository'),
 	PlayerRepository: Symbol.for('PlayerRepository'),
 	PlayerService: Symbol.for('PlayerService'),
+	GameOrchestratorService: Symbol.for('GameOrchestratorService'),
 };
 export default TYPES;

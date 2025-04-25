@@ -1,35 +1,37 @@
-import { v4 as uuid4 } from 'uuid';
-import { IPlayer } from './player.entity.interface';
-import { AppError } from '../../../../shared/errors/app/app.error';
+import { BasePlayer } from './player.abstract.entity';
 
-export class Player implements IPlayer {
-	private _playerId: string;
-	private _name: string;
-	private _score: number;
+export class Player extends BasePlayer {
+	// constructor(
+	// 	private _name: string,
+	// 	private _playerId: string,
+	// 	private _score: number = 0,
+	// ) {}
 
-	constructor(name: string) {
-		this._playerId = uuid4();
-		this._name = name;
-		this._score = 0;
-	}
+	// static createNew(name: string): Player {
+	// 	return new Player(name, uuid4());
+	// }
 
-	get name(): string {
-		return this._name;
-	}
+	// static restore(data: PlayerModel): Player {
+	// 	return new Player(data.name, data.playerId, data.score);
+	// }
 
-	get playerId(): string {
-		return this._playerId;
-	}
+	// get name(): string {
+	// 	return this._name;
+	// }
 
-	get score(): number {
-		return this._score;
-	}
+	// get playerId(): string {
+	// 	return this._playerId;
+	// }
 
-	set score(score: number) {
-		if (score > 0) {
-			this._score = score;
-		} else {
-			throw new AppError('Player score should be > 0');
-		}
-	}
+	// get score(): number {
+	// 	return this._score;
+	// }
+
+	// set score(score: number) {
+	// 	if (score > 0) {
+	// 		this._score = score;
+	// 	} else {
+	// 		throw new AppError('Player score should be > 0');
+	// 	}
+	// }
 }

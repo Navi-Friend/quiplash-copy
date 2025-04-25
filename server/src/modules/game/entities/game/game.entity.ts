@@ -4,17 +4,6 @@ import { GameStatus } from './gameStatus';
 import { GameModel } from '../../models/game.model';
 
 export class Game implements GameModel {
-	// private _gameId: string;
-	// private _VIPPlayer: VIPPlayer | undefined;
-	// private _gameCode: string;
-	// gameStatus: GameStatus = GameStatus.not_started;
-
-	// totalRounds: number = ROUNDS_NUMBER;
-	// currentRound: number;
-	// maxPlayers: number = MAX_ACTIVE_PLAYERS;
-	// currentPlayers: number = 0;
-	// spectators: number = 0;
-
 	private constructor(
 		private _gameCode: string,
 		public gameStatus: GameStatus = GameStatus.not_started,
@@ -23,18 +12,15 @@ export class Game implements GameModel {
 		private _maxPlayers: number = MAX_ACTIVE_PLAYERS,
 		private _currentPlayers: number = 0,
 		private _spectators: number = 0,
-		// VIPPlayer?: VIPPlayer,
 	) {}
 
 	static createNew(): Game {
 		const gameCode = this.generateGameCode();
-		// const gameId = uuidv4();
 		return new Game(gameCode);
 	}
 
 	static restore(data: GameModel): Game {
 		return new Game(
-			// data.gameId,
 			data.gameCode,
 			data.gameStatus,
 			data.totalRounds,
@@ -61,12 +47,6 @@ export class Game implements GameModel {
 		return this._currentRound;
 	}
 
-	// set currentRound(round: number) {
-	// 	if (round <= this.totalRounds) {
-	// 		this._currentRound = round;
-	// 	}
-	// }
-
 	get maxPlayers(): typeof this._maxPlayers {
 		return this._maxPlayers;
 	}
@@ -80,7 +60,11 @@ export class Game implements GameModel {
 	}
 
 	addOnePlayer(): void {
-		if (this._currentPlayers + 1 <= this._maxPlayers) {
+		if (
+			this._currentPlayers + 1 <= this._maxPlayers &&
+			(this.gameStatus == GameStatus.wait_players ||
+				this.gameStatus == GameStatus.not_started)
+		) {
 			if (this.currentPlayers == 0) {
 				this.gameStatus = GameStatus.wait_players;
 			}
@@ -105,25 +89,4 @@ export class Game implements GameModel {
 	startThirdRound(): void {
 		this._currentRound = 3;
 	}
-
-	// get VIPPlayer(): VIPPlayer | undefined {
-	// 	return this._VIPPlayer;
-	// }
-
-	// set VIPPlayer(vip: VIPPlayer) {
-	// 	if (!this._VIPPlayer) {
-	// 		this._VIPPlayer = vip;
-	// 		this.gameStatus = GameStatus.wait_players;
-	// 	} else {
-	// 		throw new AppError('VIP Player has already set');
-	// 	}
-	// }
-
-	// addPlayer(): void {
-	// 	if (this.currentPlayers != this.maxPlayers) {
-	// 		this.currentPlayers += 1;
-	// 	} else {
-	// 		throw new AppError('Max number of active players have been achieved');
-	// 	}
-	// }
 }

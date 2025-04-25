@@ -3,8 +3,8 @@ import TYPES from './IoC-types';
 import { ISocketExceptionFilter } from './shared/exceptionFilter/socketException.filter.interface';
 import { ILoggerService } from './shared/logger/logger.service.interface';
 import { LoggerService } from './shared/logger/logger.service';
-import { GameService } from './modules/game/services/game.service';
-import { IGameService } from './modules/game/services/game.service.interface';
+import { GameService } from './modules/game/services/game/game.service';
+import { IGameService } from './modules/game/services/game/game.service.interface';
 import { App } from './app';
 import { GameSocketController } from './modules/game/socketControllers/game.socket-controller';
 import { HTTPServer } from './shared/serverProviders/HTTPServer';
@@ -12,13 +12,15 @@ import { SocketServer } from './shared/serverProviders/SocketServer';
 import { ISocketController } from './shared/socketControllers/socketController.interface';
 import { SocketControllersFactory } from './shared/socketControllers/socketControllerFactory';
 import { RedisService } from './shared/redis/redis.service';
-import { IGameRepository } from './modules/game/repository/game.repository.interface';
-import { GameRepository } from './modules/game/repository/game.repository';
-import { IPlayerRepository } from './modules/game/repository/player.repository.interface';
-import { PlayerRepository } from './modules/game/repository/player.repository';
-import { IPlayerService } from './modules/game/services/player.service.interface';
-import { PlayerService } from './modules/game/services/player.service';
+import { GameRepository } from './modules/game/repository/game/game.repository';
+import { IPlayerRepository } from './modules/game/repository/player/player.repository.interface';
+import { PlayerRepository } from './modules/game/repository/player/player.repository';
+import { IPlayerService } from './modules/game/services/player/player.service.interface';
+import { PlayerService } from './modules/game/services/player/player.service';
 import { SocketExceptionFilter } from './shared/exceptionFilter/socketException.filter';
+import { IGameRepository } from './modules/game/repository/game/game.repository.interface';
+import { IGameOrhestrator } from './modules/game/services/gameOrchestrator.service.interface';
+import { GameOrchestrator } from './modules/game/services/gameOrchestrator.service';
 
 const sharedContainerModule = new ContainerModule(
 	(options: ContainerModuleLoadOptions) => {
@@ -58,6 +60,7 @@ const gameContainerModule = new ContainerModule((options: ContainerModuleLoadOpt
 		.to(PlayerRepository)
 		.inSingletonScope();
 	options.bind<IPlayerService>(TYPES.PlayerService).to(PlayerService);
+	options.bind<IGameOrhestrator>(TYPES.GameOrchestratorService).to(GameOrchestrator);
 });
 
 const appContainer: Container = new Container();

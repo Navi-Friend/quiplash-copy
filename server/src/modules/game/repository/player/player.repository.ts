@@ -1,13 +1,13 @@
 import { inject, injectable } from 'inversify';
-import TYPES from '../../../IoC-types';
-import { RedisService } from '../../../shared/redis/redis.service';
-import { VIPPlayer } from '../entities/player/VIPPlayer.entity';
-import { AppError } from '../../../shared/errors/app/app.error';
+import TYPES from '../../../../IoC-types';
+import { RedisService } from '../../../../shared/redis/redis.service';
+import { VIPPlayer } from '../../entities/player/VIPPlayer.entity';
+import { AppError } from '../../../../shared/errors/app/app.error';
 import { IPlayerRepository } from './player.repository.interface';
-import { ILoggerService } from '../../../shared/logger/logger.service.interface';
-import { PlayerModel } from '../models/player.model';
-import { Player } from '../entities/player/player.entity';
-import { BaseRedisRepository } from '../../../shared/redis/base.repository';
+import { ILoggerService } from '../../../../shared/logger/logger.service.interface';
+import { PlayerModel } from '../../models/player.model';
+import { Player } from '../../entities/player/player.entity';
+import { BaseRedisRepository } from '../../../../shared/redis/base.repository';
 
 @injectable()
 export class PlayerRepository extends BaseRedisRepository implements IPlayerRepository {
@@ -33,7 +33,8 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 				this.modelToRedisHash(vipModel),
 			);
 
-			this.logger.debug('VIP is set to redis', this);
+			this.logger.debug(`VIP is set to redis: ${JSON.stringify(vipModel)}`, this);
+
 			return vipModel;
 		} catch (error) {
 			this.logger.error('VIP is not set to redis', this);
@@ -43,16 +44,20 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 
 	async getVIPPlayer(gameCode: string): Promise<PlayerModel | null> {
 		try {
+			console.log(gameCode);
 			const VIPPlain = await this.redisService.redis.hGetAll(
 				`game:${gameCode}:vip`,
 			);
 
-			this.logger.debug('VIP is gotten from redis', this);
+			this.logger.debug(
+				`VIP is gotten from redis: ${JSON.stringify(VIPPlain)}`,
+				this,
+			);
 
 			return this.fromRedisHashToModel(VIPPlain);
 		} catch (error) {
-			this.logger.error('VIP is not gotten from redis', this);
-			throw new AppError('Error while get VIP Player', error as Error);
+			this.logger.error(`VIP is not gotten from redis, ${error}`, this);
+			throw new AppError(`Error while get VIP Player`, error as Error);
 		}
 	}
 
@@ -71,12 +76,15 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 				this.modelToRedisHash(playerModel),
 			);
 
-			this.logger.debug('Player is gotten from redis', this);
+			this.logger.debug(
+				`Player is set to redis: ${JSON.stringify(playerModel)}`,
+				this,
+			);
 
 			return playerModel;
 		} catch (error) {
-			this.logger.error('Player is not gotten from redis', this);
-			throw new AppError('Error while get player', error as Error);
+			this.logger.error('Player is not set to redis', this);
+			throw new AppError('Error while set player', error as Error);
 		}
 	}
 
@@ -87,6 +95,11 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 				return null;
 			}
 			const player = players?.find((p) => p.name == name);
+
+			this.logger.debug(
+				`Player is gotten from redis: ${JSON.stringify(player)}`,
+				this,
+			);
 
 			return player || null;
 		} catch (error) {
@@ -99,16 +112,23 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 		try {
 			const playersPlain = (await this.redisService.redis.json.get(
 				`game:${gameCode}:players`,
-			)) as object[];
+			)) as object[] | null;
 
-			this.logger.debug('Players are gotten from redis', this);
+			this.logger.debug(
+				`Players are gotten from redis: ${JSON.stringify(playersPlain)}`,
+				this,
+			);
+
+			if (!playersPlain) {
+				return null;
+			}
 			if (playersPlain.length) {
 				return playersPlain as PlayerModel[];
 			}
 			return null;
 		} catch (error) {
-			this.logger.error('Players are not gotten from redis', this);
-			throw new AppError('Error while get player', error as Error);
+			this.logger.error(`Players are not gotten from redis`, this);
+			throw new AppError('Error while get players', error as Error);
 		}
 	}
 

@@ -1,12 +1,12 @@
 import { inject, injectable } from 'inversify';
-import TYPES from '../../../IoC-types';
-import { RedisService } from '../../../shared/redis/redis.service';
-import { Game } from '../entities/game/game.entity';
-import { GameModel } from '../models/game.model';
-import { AppError } from '../../../shared/errors/app/app.error';
-import { GameStatus } from '../entities/game/gameStatus';
-import { ILoggerService } from '../../../shared/logger/logger.service.interface';
-import { BaseRedisRepository } from '../../../shared/redis/base.repository';
+import TYPES from '../../../../IoC-types';
+import { RedisService } from '../../../../shared/redis/redis.service';
+import { Game } from '../../entities/game/game.entity';
+import { GameModel } from '../../models/game.model';
+import { AppError } from '../../../../shared/errors/app/app.error';
+import { GameStatus } from '../../entities/game/gameStatus';
+import { ILoggerService } from '../../../../shared/logger/logger.service.interface';
+import { BaseRedisRepository } from '../../../../shared/redis/base.repository';
 import { IGameRepository } from './game.repository.interface';
 
 @injectable()
