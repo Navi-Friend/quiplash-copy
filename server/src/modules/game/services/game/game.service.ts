@@ -4,7 +4,7 @@ import TYPES from '../../../../IoC-types';
 import { GameModel } from '../../models/game.model';
 import { AppError } from '../../../../shared/errors/app/app.error';
 import { IGameService } from './game.service.interface';
-import { IGameRepository } from '../../repository/game/game.repository.interface';
+import { IGameRepository } from '../../redis-repository/game/game.repository.interface';
 
 @injectable()
 export class GameService implements IGameService {

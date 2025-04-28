@@ -1,4 +1,4 @@
-import { Express, json } from 'express';
+import { Express, json, urlencoded } from 'express';
 import { Server } from 'http';
 import { inject, injectable } from 'inversify';
 import { Server as IOServer } from 'socket.io';
@@ -10,6 +10,7 @@ import { HTTPServer } from './shared/serverProviders/HTTPServer';
 import { SocketServer } from './shared/serverProviders/SocketServer';
 import { SocketControllersFactory } from './shared/socketControllers/socketControllerFactory';
 import { RedisService } from './shared/redis/redis.service';
+import { PrismaService } from './shared/prisma/prisma.service';
 
 @injectable()
 export class App {
@@ -25,6 +26,7 @@ export class App {
 		@inject(TYPES.SocketControllersFactory)
 		private readonly socketControllersFactory: SocketControllersFactory,
 		@inject(TYPES.RedisService) private readonly redisService: RedisService,
+		@inject(TYPES.PrismaService) private readonly prismaSerivce: PrismaService,
 	) {
 		this.app = httpServer.app;
 		this.httpServer = httpServer.server;
@@ -36,15 +38,11 @@ export class App {
 		this.app.use(json());
 	}
 
-	// useExceptionFilters(): void {
-	// 	this.io.use(this.socketExceptionFilter.catch.bind(this.socketExceptionFilter));
-	// }
-
 	public async init(): Promise<void> {
+		await this.prismaSerivce.connect();
 		await this.redisService.connect();
 		this.socketControllersFactory.init();
 		this.useHTTPMiddlewares();
-		// this.useExceptionFilters();
 		this.httpServer.listen(this.port, () => {
 			this.logger.info(`Server started on ${this.port}`, this);
 		});

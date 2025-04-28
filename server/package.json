@@ -7,6 +7,7 @@
 	"scripts": {
 		"test": "test",
 		"dev": "nodemon",
+		"build": "tsc",
 		"dev:inspect": "nodemon -e ts,json --exec node --inspect --import tsx ./src/index.ts",
 		"lint": "eslint"
 	},
@@ -25,11 +26,13 @@
 		"globals": "^16.0.0",
 		"nodemon": "^3.1.9",
 		"prettier": "^3.5.3",
+		"prisma": "^6.6.0",
 		"tsx": "^4.19.3",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.29.1"
 	},
 	"dependencies": {
+		"@prisma/client": "^6.6.0",
 		"@socket.io/admin-ui": "^0.5.1",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.1",

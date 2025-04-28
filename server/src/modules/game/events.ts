@@ -3,4 +3,5 @@ export const EVENTS = {
 	joinGame: 'joinGame',
 	playerJoined: 'playerJoined',
 	startGame: 'startGame',
+	gameStarted: 'gameStarted',
 };

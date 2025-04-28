@@ -89,4 +89,12 @@ export class Game implements GameModel {
 	startThirdRound(): void {
 		this._currentRound = 3;
 	}
+
+	startGame(): void {
+		if (this._currentPlayers >= 3) {
+			this.gameStatus = GameStatus.start_game;
+		} else {
+			throw new AppError("Game can't be started with less than 3 players");
+		}
+	}
 }

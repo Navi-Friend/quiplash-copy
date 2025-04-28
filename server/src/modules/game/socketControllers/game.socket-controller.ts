@@ -3,13 +3,14 @@ import { Server, Socket } from 'socket.io';
 import { ISocketController } from '../../../shared/socketControllers/socketController.interface';
 import TYPES from '../../../IoC-types';
 import { InitGameDTO } from '../dto/initGame.dto';
-import { IPlayerService } from '../services/player/player.service.interface';
 import { EVENTS } from '../events';
 import { ValidateMiddleware } from '../middlewares/validation.middleware';
 import { ILoggerService } from '../../../shared/logger/logger.service.interface';
 import { JoinGameDTO } from '../dto/joinGame.dto';
 import { StartGameDTO } from '../dto/startGame.dto';
 import { IGameOrhestrator } from '../services/gameOrchestrator.service.interface';
+import { TIME_TO_ANSWER, TIMER_ADDING } from '../constants';
+import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
 
 @injectable()
 export class GameSocketController implements ISocketController {
@@ -19,7 +20,7 @@ export class GameSocketController implements ISocketController {
 		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
 	) {}
 	registerHandlers(socket: Socket, io: Server): void {
-		socket.on(EVENTS.initGame, (data: InitGameDTO, callback: Functino) =>
+		socket.on(EVENTS.initGame, (data: InitGameDTO, callback: Function) =>
 			this.handleInitGame(socket, io, data, callback),
 		);
 		socket.on(EVENTS.joinGame, (data: JoinGameDTO, callback: Function) =>
@@ -66,11 +67,10 @@ export class GameSocketController implements ISocketController {
 			return;
 		}
 		try {
-			console.log(data);
 			const [player, players] = await this.mainService.addPlayer(data);
 
 			await socket.join(data.gameCode);
-			io.in(data.gameCode).emit(EVENTS.playerJoined, { players });
+			io.in(data.gameCode).emit(EVENTS.playerJoined, { data: players });
 			callback({ status: 'OK', data: { player } });
 		} catch (error) {
 			callback({ status: '!OK', errors: error });
@@ -90,8 +90,46 @@ export class GameSocketController implements ISocketController {
 			return;
 		}
 		try {
-			const gameModel = await this.mainService.startGame(data);
+			const [gameModel, playerModels, questoins] =
+				await this.mainService.startGame(data);
+
+			const startTime = Date.now() + TIMER_ADDING;
+
+			console.log(questoins);
+			io.to(data.gameCode).emit(EVENTS.gameStarted, {
+				data: {
+					game: gameModel,
+					players: playerModels,
+					questoins,
+					startTime,
+					duration: TIME_TO_ANSWER,
+				},
+			});
+
 			callback({ status: 'OK', data: { gameModel } });
+		} catch (error) {
+			callback({ status: '!OK', errors: error });
+		}
+	}
+
+	async handleAnswerQuestion(
+		socket: Socket,
+		io: Server,
+		data: AnswerQuestionDTO,
+		callback: Function,
+	) {
+		const errors = await ValidateMiddleware.validateDTO(AnswerQuestionDTO, data);
+		if (errors.length) {
+			callback({ status: '!OK', errors });
+			this.logger.error(`Validation data error: ${errors}`, this);
+			return;
+		}
+		try {
+			const [player, players] = await this.mainService.registerAnswer(data);
+
+			await socket.join(data.gameCode);
+			io.in(data.gameCode).emit(EVENTS.playerJoined, { data: players });
+			callback({ status: 'OK', data: { player } });
 		} catch (error) {
 			callback({ status: '!OK', errors: error });
 		}

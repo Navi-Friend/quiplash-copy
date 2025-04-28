@@ -5,15 +5,17 @@ import { PlayerModel } from '../models/player.model';
 import TYPES from '../../../IoC-types';
 import { IPlayerService } from './player/player.service.interface';
 import { Game } from '../entities/game/game.entity';
-import { IPlayerRepository } from '../repository/player/player.repository.interface';
+import { IPlayerRepository } from '../redis-repository/player/player.repository.interface';
 import { IGameService } from './game/game.service.interface';
 import { Player } from '../entities/player/player.entity';
 import { AppError } from '../../../shared/errors/app/app.error';
 import { JoinGameDTO } from '../dto/joinGame.dto';
-import { GameStatus } from '../entities/game/gameStatus';
 import { StartGameDTO } from '../dto/startGame.dto';
-import { IGameRepository } from '../repository/game/game.repository.interface';
+import { IGameRepository } from '../redis-repository/game/game.repository.interface';
 import { IGameOrhestrator } from './gameOrchestrator.service.interface';
+import { PlayerQuestions, Round } from '../entities/round.entity';
+import { IRoundService } from './round/round.service.interface';
+import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
 
 @injectable()
 export class GameOrchestrator implements IGameOrhestrator {
@@ -23,6 +25,7 @@ export class GameOrchestrator implements IGameOrhestrator {
 		private readonly playerRepository: IPlayerRepository,
 		@inject(TYPES.GameService) private readonly gameService: IGameService,
 		@inject(TYPES.GameRepository) private readonly gameRepository: IGameRepository,
+		@inject(TYPES.RoundService) private readonly roundService: IRoundService,
 	) {}
 
 	async initGame({
@@ -67,9 +70,32 @@ export class GameOrchestrator implements IGameOrhestrator {
 		return [playerModel, [vip, ...players]];
 	}
 
-	async startGame({ gameCode }: StartGameDTO): Promise<GameModel> {
+	async startGame({
+		gameCode,
+	}: StartGameDTO): Promise<[GameModel, PlayerModel[], PlayerQuestions[]]> {
 		const game = await this.gameService.getGameInstanceFromDB(gameCode);
-		game.gameStatus = GameStatus.start_game;
-		return await this.gameRepository.setGame(game);
+		game.startGame();
+		const gameModel = await this.gameRepository.setGame(game);
+		const players = (await this.playerRepository.getPlayers(
+			game.gameCode,
+		)) as PlayerModel[];
+
+		const questions = await this.startRound(gameCode);
+		return [gameModel, players, questions];
+	}
+
+	async startRound(gameCode: string): Promise<PlayerQuestions[]> {
+		const players =
+			await this.playerService.getPlayerInstancesWithVIPFromDB(gameCode);
+		const questions = await this.roundService.getQuestionInstancesFromDB(
+			players.length,
+		);
+		const round = Round.createNew(players, questions);
+		console.log(round);
+		return round.distributeQuestions();
+	}
+
+	async registerAnswer(data: AnswerQuestionDTO): Promise<void> {
+		
 	}
 }

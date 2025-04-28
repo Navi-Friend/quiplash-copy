@@ -12,15 +12,20 @@ import { SocketServer } from './shared/serverProviders/SocketServer';
 import { ISocketController } from './shared/socketControllers/socketController.interface';
 import { SocketControllersFactory } from './shared/socketControllers/socketControllerFactory';
 import { RedisService } from './shared/redis/redis.service';
-import { GameRepository } from './modules/game/repository/game/game.repository';
-import { IPlayerRepository } from './modules/game/repository/player/player.repository.interface';
-import { PlayerRepository } from './modules/game/repository/player/player.repository';
+import { GameRepository } from './modules/game/redis-repository/game/game.repository';
+import { IPlayerRepository } from './modules/game/redis-repository/player/player.repository.interface';
+import { PlayerRepository } from './modules/game/redis-repository/player/player.repository';
 import { IPlayerService } from './modules/game/services/player/player.service.interface';
 import { PlayerService } from './modules/game/services/player/player.service';
 import { SocketExceptionFilter } from './shared/exceptionFilter/socketException.filter';
-import { IGameRepository } from './modules/game/repository/game/game.repository.interface';
+import { IGameRepository } from './modules/game/redis-repository/game/game.repository.interface';
 import { IGameOrhestrator } from './modules/game/services/gameOrchestrator.service.interface';
 import { GameOrchestrator } from './modules/game/services/gameOrchestrator.service';
+import { PrismaService } from './shared/prisma/prisma.service';
+import { QuestionRepository } from './modules/game/repository/question.repository';
+import { IQuestionRepository } from './modules/game/repository/question.repository.interface';
+import { IRoundService } from './modules/game/services/round/round.service.interface';
+import { RoundService } from './modules/game/services/round/round.service';
 
 const sharedContainerModule = new ContainerModule(
 	(options: ContainerModuleLoadOptions) => {
@@ -45,6 +50,7 @@ const sharedContainerModule = new ContainerModule(
 			.bind<RedisService>(TYPES.RedisService)
 			.to(RedisService)
 			.inSingletonScope();
+		options.bind<PrismaService>(TYPES.PrismaService).to(PrismaService);
 	},
 );
 
@@ -61,6 +67,8 @@ const gameContainerModule = new ContainerModule((options: ContainerModuleLoadOpt
 		.inSingletonScope();
 	options.bind<IPlayerService>(TYPES.PlayerService).to(PlayerService);
 	options.bind<IGameOrhestrator>(TYPES.GameOrchestratorService).to(GameOrchestrator);
+	options.bind<IQuestionRepository>(TYPES.QuestionRepository).to(QuestionRepository);
+	options.bind<IRoundService>(TYPES.RoundService).to(RoundService);
 });
 
 const appContainer: Container = new Container();

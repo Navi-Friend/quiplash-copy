@@ -5,7 +5,8 @@ import TYPES from '../../../../IoC-types';
 import { AppError } from '../../../../shared/errors/app/app.error';
 import { PlayerModel } from '../../models/player.model';
 import { IGameService } from '../game/game.service.interface';
-import { IPlayerRepository } from '../../repository/player/player.repository.interface';
+import { IPlayerRepository } from '../../redis-repository/player/player.repository.interface';
+import { Player } from '../../entities/player/player.entity';
 
 @injectable()
 export class PlayerService implements IPlayerService {
@@ -28,5 +29,21 @@ export class PlayerService implements IPlayerService {
 		const existingPlayer = await this.playerRepository.getPlayer(gameCode, name);
 		const existingVIP = await this.playerRepository.getVIPPlayer(gameCode);
 		return Boolean(existingPlayer || existingVIP?.name == name);
+	}
+
+	async getPlayerInstancesWithVIPFromDB(gameCode: string): Promise<Player[]> {
+		const playerModels = await this.playerRepository.getPlayers(gameCode);
+		if (!playerModels) {
+			throw new AppError('Player instances are not found in redis');
+		}
+
+		const vip = await this.playerRepository.getVIPPlayer(gameCode);
+		if (!vip) {
+			throw new AppError('VIP instances is not found in redis');
+		}
+
+		let players = playerModels.map((p) => Player.restore(p));
+		players = [VIPPlayer.restore(vip), ...players];
+		return players;
 	}
 }
