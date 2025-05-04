@@ -5,4 +5,5 @@ types:
 game:{gameCode} -> Hash  PK -- gameCode
 game:{gameCode}:players:{name} -> Hash  PK -- name
 game:{gameCode}:players -> Set  (For getting all players)
-game:{gameId}:rounds -> Hash  PK -- gameId
+game:{gameCode}:rounds -> Hash  PK -- gameId
+game:{}

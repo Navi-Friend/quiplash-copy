@@ -4,4 +4,8 @@ export const EVENTS = {
 	playerJoined: 'playerJoined',
 	startGame: 'startGame',
 	gameStarted: 'gameStarted',
+	answerQuestion: 'answerQuestion',
+	playerAsked: 'playerAsked',
+	questionForVotiong: 'questionForVotiong',
+	requestQuestionsForVoting: 'requestQuestionsForVoting',
 };

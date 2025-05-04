@@ -11,6 +11,7 @@ import { StartGameDTO } from '../dto/startGame.dto';
 import { IGameOrhestrator } from '../services/gameOrchestrator.service.interface';
 import { TIME_TO_ANSWER, TIMER_ADDING } from '../constants';
 import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
+import { RequestQuestionForVotingDTO } from '../dto/requestQuestion.dto';
 
 @injectable()
 export class GameSocketController implements ISocketController {
@@ -28,6 +29,14 @@ export class GameSocketController implements ISocketController {
 		);
 		socket.on(EVENTS.startGame, (data: StartGameDTO, callback: Function) =>
 			this.handleStartGame(socket, io, data, callback),
+		);
+		socket.on(EVENTS.answerQuestion, (data: AnswerQuestionDTO, callback: Function) =>
+			this.handleAnswerQuestion(socket, io, data, callback),
+		);
+		socket.on(
+			EVENTS.requestQuestionsForVoting,
+			(data: RequestQuestionForVotingDTO, callback: Function) =>
+				this.handleRequestQuestionForVoting(socket, io, data, callback),
 		);
 	}
 
@@ -90,18 +99,18 @@ export class GameSocketController implements ISocketController {
 			return;
 		}
 		try {
-			const [gameModel, playerModels, questoins] =
+			const [gameModel, playerModels, questoins, roundId] =
 				await this.mainService.startGame(data);
 
 			const startTime = Date.now() + TIMER_ADDING;
 
-			console.log(questoins);
 			io.to(data.gameCode).emit(EVENTS.gameStarted, {
 				data: {
 					game: gameModel,
 					players: playerModels,
 					questoins,
 					startTime,
+					roundId,
 					duration: TIME_TO_ANSWER,
 				},
 			});
@@ -117,7 +126,7 @@ export class GameSocketController implements ISocketController {
 		io: Server,
 		data: AnswerQuestionDTO,
 		callback: Function,
-	) {
+	): Promise<void> {
 		const errors = await ValidateMiddleware.validateDTO(AnswerQuestionDTO, data);
 		if (errors.length) {
 			callback({ status: '!OK', errors });
@@ -125,11 +134,40 @@ export class GameSocketController implements ISocketController {
 			return;
 		}
 		try {
-			const [player, players] = await this.mainService.registerAnswer(data);
+			await this.mainService.registerAnswer(data);
 
-			await socket.join(data.gameCode);
-			io.in(data.gameCode).emit(EVENTS.playerJoined, { data: players });
-			callback({ status: 'OK', data: { player } });
+			io.in(data.gameCode).emit(EVENTS.playerAsked, { data: data.playerName });
+			callback({ status: 'OK', data: {} });
+		} catch (error) {
+			callback({ status: '!OK', errors: error });
+		}
+	}
+
+	async handleRequestQuestionForVoting(
+		socket: Socket,
+		io: Server,
+		data: RequestQuestionForVotingDTO,
+		callback: Function,
+	): Promise<void> {
+		const errors = await ValidateMiddleware.validateDTO(
+			RequestQuestionForVotingDTO,
+			data,
+		);
+		if (errors.length) {
+			callback({ status: '!OK', errors });
+			this.logger.error(`Validation data error: ${errors}`, this);
+			return;
+		}
+		try {
+			const [question, answers] =
+				await this.mainService.getQuestionWithAnswers(data);
+			callback({
+				status: 'OK',
+				data: { question, answers: [answers[0], answers[1]] },
+			});
+			io.in(data.gameCode).emit(EVENTS.questionForVotiong, {
+				data: { question, answers: [answers[0], answers[1]] },
+			});
 		} catch (error) {
 			callback({ status: '!OK', errors: error });
 		}

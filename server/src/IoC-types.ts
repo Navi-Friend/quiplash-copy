@@ -15,5 +15,6 @@ const TYPES = {
 	GameOrchestratorService: Symbol.for('GameOrchestratorService'),
 	QuestionRepository: Symbol.for('QuestionRepository'),
 	RoundService: Symbol.for('RoundService'),
+	RoundRepository: Symbol.for('RoundRepository'),
 };
 export default TYPES;

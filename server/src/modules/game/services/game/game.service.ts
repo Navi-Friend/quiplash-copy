@@ -15,7 +15,7 @@ export class GameService implements IGameService {
 	async getGameInstanceFromDB(gameCode: string): Promise<Game> {
 		const gameModel = await this.gameRepository.getGame(gameCode);
 		if (!gameModel) {
-			throw new AppError('Game instanse is not found in redis');
+			throw new AppError('Game is empty in redis');
 		}
 
 		return Game.restore(gameModel);

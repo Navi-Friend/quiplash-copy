@@ -3,24 +3,24 @@ import { Answer } from './answer.entity';
 export class Vote {
 	constructor(
 		private _voteId: string,
-		private _playerId: string,
-		private _answer: Answer,
+		private _playerName: string,
+		private _answerId: string,
 	) {}
 
-	getAnswer(playerId: string, answer: Answer): void {
-		this._answer = answer;
-		this._playerId = playerId;
-	}
+	// getAnswer(playerId: string, answerId: string): void {
+	// 	this._answer = answer;
+	// 	this._playerId = playerId;
+	// }
 
 	get voteId(): string {
 		return this._voteId;
 	}
 
-	get playerId(): string {
-		return this.playerId;
+	get playerName(): string {
+		return this._playerName;
 	}
 
-	get answer(): Answer {
-		return this._answer;
+	get answerId(): string {
+		return this._answerId;
 	}
 }

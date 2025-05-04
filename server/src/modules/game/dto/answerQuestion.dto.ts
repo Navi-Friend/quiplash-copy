@@ -13,4 +13,7 @@ export class AnswerQuestionDTO {
 
 	@IsInt({ message: 'questionId is not number' })
 	questionId!: number;
+
+	@IsString({ message: 'roundId is not string' })
+	roundId!: string;
 }

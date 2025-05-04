@@ -44,7 +44,6 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 
 	async getVIPPlayer(gameCode: string): Promise<PlayerModel | null> {
 		try {
-			console.log(gameCode);
 			const VIPPlain = await this.redisService.redis.hGetAll(
 				`game:${gameCode}:vip`,
 			);
@@ -137,7 +136,7 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 			? {
 					playerId: data.playerId,
 					name: data.name,
-					score: parseInt(data.points),
+					score: parseInt(data.score),
 				}
 			: null;
 	}

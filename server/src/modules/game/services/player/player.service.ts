@@ -34,12 +34,12 @@ export class PlayerService implements IPlayerService {
 	async getPlayerInstancesWithVIPFromDB(gameCode: string): Promise<Player[]> {
 		const playerModels = await this.playerRepository.getPlayers(gameCode);
 		if (!playerModels) {
-			throw new AppError('Player instances are not found in redis');
+			throw new AppError('Players are empty in redis');
 		}
 
 		const vip = await this.playerRepository.getVIPPlayer(gameCode);
 		if (!vip) {
-			throw new AppError('VIP instances is not found in redis');
+			throw new AppError('VIP is empty in redis');
 		}
 
 		let players = playerModels.map((p) => Player.restore(p));

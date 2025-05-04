@@ -26,6 +26,8 @@ import { QuestionRepository } from './modules/game/repository/question.repositor
 import { IQuestionRepository } from './modules/game/repository/question.repository.interface';
 import { IRoundService } from './modules/game/services/round/round.service.interface';
 import { RoundService } from './modules/game/services/round/round.service';
+import { IRoundRepository } from './modules/game/redis-repository/round/round.repository.interface';
+import { RoundRepository } from './modules/game/redis-repository/round/round.repository';
 
 const sharedContainerModule = new ContainerModule(
 	(options: ContainerModuleLoadOptions) => {
@@ -69,6 +71,7 @@ const gameContainerModule = new ContainerModule((options: ContainerModuleLoadOpt
 	options.bind<IGameOrhestrator>(TYPES.GameOrchestratorService).to(GameOrchestrator);
 	options.bind<IQuestionRepository>(TYPES.QuestionRepository).to(QuestionRepository);
 	options.bind<IRoundService>(TYPES.RoundService).to(RoundService);
+	options.bind<IRoundRepository>(TYPES.RoundRepository).to(RoundRepository);
 });
 
 const appContainer: Container = new Container();

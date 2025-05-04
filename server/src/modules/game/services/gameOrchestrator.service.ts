@@ -16,6 +16,11 @@ import { IGameOrhestrator } from './gameOrchestrator.service.interface';
 import { PlayerQuestions, Round } from '../entities/round.entity';
 import { IRoundService } from './round/round.service.interface';
 import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
+import { IRoundRepository } from '../redis-repository/round/round.repository.interface';
+import { Answer } from '../entities/answer.entity';
+import { RequestQuestionForVotingDTO } from '../dto/requestQuestion.dto';
+import { AnswerModel } from '../models/answer.model';
+import { QuestionModel } from '../models/question.model';
 
 @injectable()
 export class GameOrchestrator implements IGameOrhestrator {
@@ -26,6 +31,7 @@ export class GameOrchestrator implements IGameOrhestrator {
 		@inject(TYPES.GameService) private readonly gameService: IGameService,
 		@inject(TYPES.GameRepository) private readonly gameRepository: IGameRepository,
 		@inject(TYPES.RoundService) private readonly roundService: IRoundService,
+		@inject(TYPES.RoundRepository) private readonly roundRepository: IRoundRepository,
 	) {}
 
 	async initGame({
@@ -72,30 +78,105 @@ export class GameOrchestrator implements IGameOrhestrator {
 
 	async startGame({
 		gameCode,
-	}: StartGameDTO): Promise<[GameModel, PlayerModel[], PlayerQuestions[]]> {
+	}: StartGameDTO): Promise<[GameModel, PlayerModel[], PlayerQuestions[], string]> {
 		const game = await this.gameService.getGameInstanceFromDB(gameCode);
 		game.startGame();
 		const gameModel = await this.gameRepository.setGame(game);
 		const players = (await this.playerRepository.getPlayers(
 			game.gameCode,
 		)) as PlayerModel[];
+		const VIPModel = (await this.playerRepository.getVIPPlayer(
+			game.gameCode,
+		)) as PlayerModel;
+		players.unshift(VIPModel);
 
-		const questions = await this.startRound(gameCode);
-		return [gameModel, players, questions];
+		const [questions, roundId] = await this.startRound(gameCode);
+		return [gameModel, players, questions, roundId];
 	}
 
-	async startRound(gameCode: string): Promise<PlayerQuestions[]> {
+	async startRound(gameCode: string): Promise<[PlayerQuestions[], string]> {
 		const players =
 			await this.playerService.getPlayerInstancesWithVIPFromDB(gameCode);
 		const questions = await this.roundService.getQuestionInstancesFromDB(
 			players.length,
 		);
 		const round = Round.createNew(players, questions);
-		console.log(round);
-		return round.distributeQuestions();
+		await this.roundRepository.setRound(gameCode, round);
+		return [round.distributeQuestions(), round.roundId];
 	}
 
-	async registerAnswer(data: AnswerQuestionDTO): Promise<void> {
-		
+	async registerAnswer({
+		answer,
+		gameCode,
+		playerName,
+		questionId,
+		roundId,
+	}: AnswerQuestionDTO): Promise<void> {
+		const players =
+			await this.playerService.getPlayerInstancesWithVIPFromDB(gameCode);
+		const round = await this.roundService.getRoundInstanceFromDB(
+			gameCode,
+			roundId,
+			players,
+		);
+
+		const answerInstance = Answer.createNew(playerName, answer, questionId);
+		const isDublicatedAnswer = this.isAnswerDublicates(
+			round,
+			answer,
+			questionId,
+			playerName,
+		);
+		if (isDublicatedAnswer) {
+			throw new AppError('Answers Dublication');
+		}
+		round.answers.push(answerInstance);
+
+		await this.roundRepository.setRound(gameCode, round);
+	}
+
+	async getQuestionWithAnswers({
+		gameCode,
+		questionId,
+		roundId,
+	}: RequestQuestionForVotingDTO): Promise<
+		[QuestionModel, [AnswerModel, AnswerModel]]
+	> {
+		const question = await this.roundRepository.getQuestionById(
+			gameCode,
+			roundId,
+			questionId,
+		);
+		if (!question) {
+			throw new AppError(
+				'Question with this id and gameCode is not found in redis',
+			);
+		}
+
+		const answers = await this.roundRepository.getAnswersByQuestionId(
+			gameCode,
+			roundId,
+			questionId,
+		);
+		if (!answers) {
+			throw new AppError(
+				'Answers with this questionId and gameCode are not found in redis',
+			);
+		}
+
+		return [question, [answers[0], answers[1]]];
+	}
+
+	private isAnswerDublicates(
+		round: Round,
+		answer: string,
+		questionId: number,
+		playerName: string,
+	): boolean {
+		const isAnswerDub = round.answers.some((a) => a.answer == answer);
+		const isQuestionIdDub = round.answers.some((a) => a.questionId == questionId);
+		const isPlayerNameDub = round.answers.some((a) => a.playerName == playerName);
+
+		return isAnswerDub && isPlayerNameDub && isQuestionIdDub;
 	}
 }
