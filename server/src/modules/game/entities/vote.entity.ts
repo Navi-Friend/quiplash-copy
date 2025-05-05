@@ -1,7 +1,7 @@
-import { Answer } from './answer.entity';
+import { v4 } from 'uuid';
 
 export class Vote {
-	constructor(
+	private constructor(
 		private _voteId: string,
 		private _playerName: string,
 		private _answerId: string,
@@ -11,6 +11,14 @@ export class Vote {
 	// 	this._answer = answer;
 	// 	this._playerId = playerId;
 	// }
+
+	static createNew(playerName: string, answerId: string): Vote {
+		return new Vote(v4(), playerName, answerId);
+	}
+
+	static restore(voteId: string, playerName: string, answerId: string): Vote {
+		return new Vote(voteId, playerName, answerId);
+	}
 
 	get voteId(): string {
 		return this._voteId;

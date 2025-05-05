@@ -40,8 +40,8 @@ export class RoundService implements IRoundService {
 		const answers = data.answers?.map((a) =>
 			Answer.restore(a.answerId, a.playerName, a.answer, a.questionId),
 		);
-		const votes = data.votes?.map(
-			(v) => new Vote(v.voteId, v.playerName, v.answerId),
+		const votes = data.votes?.map((v) =>
+			Vote.restore(v.voteId, v.playerName, v.answerId),
 		);
 
 		const round = Round.restore(data.roundId, players, questions, votes, answers);

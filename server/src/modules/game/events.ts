@@ -6,6 +6,8 @@ export const EVENTS = {
 	gameStarted: 'gameStarted',
 	answerQuestion: 'answerQuestion',
 	playerAsked: 'playerAsked',
+	requestQuestionForVoting: 'requestQuestionForVoting',
 	questionForVotiong: 'questionForVotiong',
-	requestQuestionsForVoting: 'requestQuestionsForVoting',
+	voteForAnswer: 'voteForAnswer',
+	sendVotes: 'sendVotes',
 };

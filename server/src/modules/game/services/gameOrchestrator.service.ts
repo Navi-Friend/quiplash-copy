@@ -21,6 +21,9 @@ import { Answer } from '../entities/answer.entity';
 import { RequestQuestionForVotingDTO } from '../dto/requestQuestion.dto';
 import { AnswerModel } from '../models/answer.model';
 import { QuestionModel } from '../models/question.model';
+import { VotingDTO } from '../dto/voting.dto';
+import { Vote } from '../entities/vote.entity';
+import { VoteModel } from '../models/vote.model';
 
 @injectable()
 export class GameOrchestrator implements IGameOrhestrator {
@@ -33,7 +36,6 @@ export class GameOrchestrator implements IGameOrhestrator {
 		@inject(TYPES.RoundService) private readonly roundService: IRoundService,
 		@inject(TYPES.RoundRepository) private readonly roundRepository: IRoundRepository,
 	) {}
-
 	async initGame({
 		playerName,
 	}: InitGameDTO): Promise<[GameModel, PlayerModel | null]> {
@@ -164,7 +166,41 @@ export class GameOrchestrator implements IGameOrhestrator {
 			);
 		}
 
-		return [question, [answers[0], answers[1]]];
+		return [question, [answers[0] || {}, answers[1] || {}]];
+	}
+
+	async voteForAnswer({
+		answerId,
+		gameCode,
+		playerName,
+		roundId,
+	}: VotingDTO): Promise<VoteModel[]> {
+		const vote = Vote.createNew(playerName, answerId);
+
+		const players =
+			await this.playerService.getPlayerInstancesWithVIPFromDB(gameCode);
+
+		const round = await this.roundService.getRoundInstanceFromDB(
+			gameCode,
+			roundId,
+			players,
+		);
+
+		const isAnswerExists = round.answers.some((a) => a.answerId == answerId);
+
+		if (!isAnswerExists) {
+			throw new AppError(`Answer with id ${answerId} doesn't exist`);
+		}
+
+		if (this.isDublicatedVote(round.votes, vote)) {
+			throw new AppError('Trying to add existing vote');
+		}
+
+		round.votes.push(vote);
+
+		await this.roundRepository.setRound(gameCode, round);
+
+		return round.votes as VoteModel[];
 	}
 
 	private isAnswerDublicates(
@@ -178,5 +214,11 @@ export class GameOrchestrator implements IGameOrhestrator {
 		const isPlayerNameDub = round.answers.some((a) => a.playerName == playerName);
 
 		return isAnswerDub && isPlayerNameDub && isQuestionIdDub;
+	}
+
+	private isDublicatedVote(votes: Vote[], v: Vote): boolean {
+		return votes.some(
+			(vote) => vote.answerId == v.answerId && v.playerName == v.playerName,
+		);
 	}
 }

@@ -9,9 +9,10 @@ import { ILoggerService } from '../../../shared/logger/logger.service.interface'
 import { JoinGameDTO } from '../dto/joinGame.dto';
 import { StartGameDTO } from '../dto/startGame.dto';
 import { IGameOrhestrator } from '../services/gameOrchestrator.service.interface';
-import { TIME_TO_ANSWER, TIMER_ADDING } from '../constants';
+import { TIME_TO_ANSWER, TIME_TO_VOTE, TIMER_ADDING } from '../constants';
 import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
 import { RequestQuestionForVotingDTO } from '../dto/requestQuestion.dto';
+import { VotingDTO } from '../dto/voting.dto';
 
 @injectable()
 export class GameSocketController implements ISocketController {
@@ -34,9 +35,12 @@ export class GameSocketController implements ISocketController {
 			this.handleAnswerQuestion(socket, io, data, callback),
 		);
 		socket.on(
-			EVENTS.requestQuestionsForVoting,
+			EVENTS.requestQuestionForVoting,
 			(data: RequestQuestionForVotingDTO, callback: Function) =>
 				this.handleRequestQuestionForVoting(socket, io, data, callback),
+		);
+		socket.on(EVENTS.voteForAnswer, (data: VotingDTO, callback: Function) =>
+			this.handleVoting(socket, io, data, callback),
 		);
 	}
 
@@ -161,12 +165,52 @@ export class GameSocketController implements ISocketController {
 		try {
 			const [question, answers] =
 				await this.mainService.getQuestionWithAnswers(data);
+
+			const startTime = Date.now() + TIMER_ADDING;
+
 			callback({
 				status: 'OK',
-				data: { question, answers: [answers[0], answers[1]] },
+				data: {
+					question,
+					answers: [answers[0], answers[1]],
+					startTime,
+					duration: TIME_TO_VOTE,
+				},
 			});
 			io.in(data.gameCode).emit(EVENTS.questionForVotiong, {
-				data: { question, answers: [answers[0], answers[1]] },
+				data: {
+					question,
+					answers: [answers[0], answers[1]],
+					startTime,
+					duration: TIME_TO_VOTE,
+				},
+			});
+		} catch (error) {
+			callback({ status: '!OK', errors: error });
+		}
+	}
+
+	async handleVoting(
+		socket: Socket,
+		io: Server,
+		data: VotingDTO,
+		callback: Function,
+	): Promise<void> {
+		const errors = await ValidateMiddleware.validateDTO(VotingDTO, data);
+		if (errors.length) {
+			callback({ status: '!OK', errors });
+			this.logger.error(`Validation data error: ${errors}`, this);
+			return;
+		}
+		try {
+			const votes = await this.mainService.voteForAnswer(data);
+
+			callback({
+				status: 'OK',
+				data: votes,
+			});
+			io.in(data.gameCode).emit(EVENTS.sendVotes, {
+				data: votes,
 			});
 		} catch (error) {
 			callback({ status: '!OK', errors: error });
