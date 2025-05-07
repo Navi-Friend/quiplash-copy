@@ -199,6 +199,16 @@ export class GameOrchestrator implements IGameOrhestrator {
 			throw new AppError('Trying to add existing vote');
 		}
 
+		const answer = await this.roundRepository.getAnswerById(
+			gameCode,
+			roundId,
+			answerId,
+		);
+
+		if (playerName == answer?.playerName) {
+			throw new AppError('You can not vote for your answer');
+		}
+
 		round.votes.push(vote);
 
 		await this.roundRepository.setRound(gameCode, round);

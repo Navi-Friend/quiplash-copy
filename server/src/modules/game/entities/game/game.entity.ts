@@ -79,7 +79,11 @@ export class Game implements GameModel {
 	}
 
 	nextRound(): void {
-		this._currentRound += 1;
+		if (this._currentRound + 1 <= ROUNDS_NUMBER) {
+			this._currentRound += 1;
+		} else {
+			throw new AppError('Rounds are ended');
+		}
 	}
 
 	startGame(): void {

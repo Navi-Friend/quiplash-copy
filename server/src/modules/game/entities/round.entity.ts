@@ -5,7 +5,7 @@ import { Vote } from './vote.entity';
 import { Answer } from './answer.entity';
 
 export type PlayerQuestions = {
-	playerId: string;
+	playerName: string;
 	question1: { questionId: number; text: string };
 	question2: { questionId: number; text: string };
 };
@@ -47,7 +47,6 @@ export class Round {
 		const answer1Text = answer1.answer.trim().toLowerCase();
 		const answer2Text = answer2.answer.trim().toLowerCase();
 
-		console.log(answer1, answer2, votes1, votes2, roundNumber);
 		if (answer1Text === answer2Text) {
 			return {
 				answer1: { answerId: answer1.answerId, points: 0 },
@@ -77,8 +76,8 @@ export class Round {
 				extra: null,
 			};
 		}
-		const answer1Percentage = Math.round(votes1 / (votes1 + votes2)) * 100;
-		const answer2Percentage = Math.round(votes2 / (votes1 + votes2)) * 100;
+		const answer1Percentage = Math.round((votes1 / (votes1 + votes2)) * 100);
+		const answer2Percentage = Math.round((votes2 / (votes1 + votes2)) * 100);
 
 		if (answer1Percentage == 100) {
 			return {
@@ -135,7 +134,7 @@ export class Round {
 				this.questions[(index + randomOffset) % this.players.length];
 
 			playersQuestions.push({
-				playerId: player.playerId,
+				playerName: player.name,
 				question1: {
 					questionId: question1.questionId,
 					text: question1.text,
