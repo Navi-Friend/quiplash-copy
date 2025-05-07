@@ -37,6 +37,93 @@ export class Round {
 		return this._roundId;
 	}
 
+	static calcPoints(
+		answer1: Answer,
+		answer2: Answer,
+		votes1: number,
+		votes2: number,
+		roundNumber: number,
+	): VotingResult {
+		const answer1Text = answer1.answer.trim().toLowerCase();
+		const answer2Text = answer2.answer.trim().toLowerCase();
+
+		console.log(answer1, answer2, votes1, votes2, roundNumber);
+		if (answer1Text === answer2Text) {
+			return {
+				answer1: { answerId: answer1.answerId, points: 0 },
+				answer2: { answerId: answer2.answerId, points: 0 },
+				extra: 'mess',
+			};
+		}
+
+		if (!answer1Text) {
+			return {
+				answer1: { answerId: answer1.answerId, points: 0 },
+				answer2: {
+					answerId: answer2.answerId,
+					points: 1000 * roundNumber + 100 * roundNumber,
+				},
+				extra: null,
+			};
+		}
+
+		if (!answer2Text) {
+			return {
+				answer1: {
+					answerId: answer1.answerId,
+					points: 1000 * roundNumber + 100 * roundNumber,
+				},
+				answer2: { answerId: answer2.answerId, points: 0 },
+				extra: null,
+			};
+		}
+		const answer1Percentage = Math.round(votes1 / (votes1 + votes2)) * 100;
+		const answer2Percentage = Math.round(votes2 / (votes1 + votes2)) * 100;
+
+		if (answer1Percentage == 100) {
+			return {
+				answer1: {
+					answerId: answer1.answerId,
+					points: (1000 + 100 + 250) * roundNumber,
+				},
+				answer2: { answerId: answer2.answerId, points: 0 },
+				extra: 'quiplash',
+			};
+		}
+
+		if (answer2Percentage == 100) {
+			return {
+				answer1: {
+					answerId: answer1.answerId,
+					points: 0,
+				},
+				answer2: {
+					answerId: answer2.answerId,
+					points: (1000 + 100 + 250) * roundNumber,
+				},
+				extra: 'quiplash',
+			};
+		}
+
+		return {
+			answer1: {
+				answerId: answer1.answerId,
+				points:
+					answer1Percentage > answer2Percentage
+						? (answer1Percentage * 10 + 100) * roundNumber
+						: answer1Percentage * 10 * roundNumber,
+			},
+			answer2: {
+				answerId: answer2.answerId,
+				points:
+					answer2Percentage > answer1Percentage
+						? (answer2Percentage * 10 + 100) * roundNumber
+						: answer2Percentage * 10 * roundNumber,
+			},
+			extra: null,
+		};
+	}
+
 	distributeQuestions(): PlayerQuestions[] {
 		const playersQuestions: PlayerQuestions[] = [];
 
@@ -58,4 +145,10 @@ export class Round {
 		});
 		return playersQuestions;
 	}
+}
+
+export interface VotingResult {
+	answer1: { answerId: string; points: number };
+	answer2: { answerId: string; points: number };
+	extra: 'mess' | 'quiplash' | null;
 }

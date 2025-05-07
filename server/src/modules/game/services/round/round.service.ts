@@ -47,4 +47,44 @@ export class RoundService implements IRoundService {
 		const round = Round.restore(data.roundId, players, questions, votes, answers);
 		return round;
 	}
+
+	async getVotesInstancesFromDB(
+		gameCode: string,
+		roundId: string,
+		answerId: string,
+	): Promise<Vote[]> {
+		const voteModels = await this.roundRepository.getVotesByAnswerId(
+			gameCode,
+			roundId,
+			answerId,
+		);
+		if (!voteModels) {
+			throw new AppError('Votes are empty in redis');
+		}
+
+		return voteModels.map((v) => Vote.restore(v.voteId, v.playerName, v.answerId));
+	}
+
+	async getAnswerInstanceFromDB(
+		gameCode: string,
+		roundId: string,
+		answerId: string,
+	): Promise<Answer> {
+		const answerModel = await this.roundRepository.getAnswerById(
+			gameCode,
+			roundId,
+			answerId,
+		);
+
+		if (!answerModel) {
+			throw new AppError('Answer is empty in redis');
+		}
+
+		return Answer.restore(
+			answerModel.answerId,
+			answerModel.playerName,
+			answerModel.answer,
+			answerModel.questionId,
+		);
+	}
 }

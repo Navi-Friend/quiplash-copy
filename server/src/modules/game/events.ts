@@ -10,4 +10,6 @@ export const EVENTS = {
 	questionForVotiong: 'questionForVotiong',
 	voteForAnswer: 'voteForAnswer',
 	sendVotes: 'sendVotes',
+	pointsCalculated: 'pointsCalculated',
+	calcVotes: 'calcVotes',
 };

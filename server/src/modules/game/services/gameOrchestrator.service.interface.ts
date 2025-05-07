@@ -1,10 +1,11 @@
 import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
+import { CalcAnswerPointsDTO } from '../dto/calcPoints.dto';
 import { InitGameDTO } from '../dto/initGame.dto';
 import { JoinGameDTO } from '../dto/joinGame.dto';
 import { RequestQuestionForVotingDTO } from '../dto/requestQuestion.dto';
 import { StartGameDTO } from '../dto/startGame.dto';
 import { VotingDTO } from '../dto/voting.dto';
-import { PlayerQuestions } from '../entities/round.entity';
+import { PlayerQuestions, VotingResult } from '../entities/round.entity';
 import { AnswerModel } from '../models/answer.model';
 import { GameModel } from '../models/game.model';
 import { PlayerModel } from '../models/player.model';
@@ -23,4 +24,7 @@ export interface IGameOrhestrator {
 		data: RequestQuestionForVotingDTO,
 	): Promise<[QuestionModel, [AnswerModel, AnswerModel]]>;
 	voteForAnswer(data: VotingDTO): Promise<VoteModel[]>;
+	calcAnswerPoints(
+		data: CalcAnswerPointsDTO,
+	): Promise<[VotingResult, PlayerModel, PlayerModel]>;
 }

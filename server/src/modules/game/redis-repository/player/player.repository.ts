@@ -90,6 +90,7 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 	async getPlayer(gameCode: string, name: string): Promise<PlayerModel | null> {
 		try {
 			const players = await this.getPlayers(gameCode);
+			console.log(JSON.stringify(players) + ' players');
 			if (!players) {
 				return null;
 			}

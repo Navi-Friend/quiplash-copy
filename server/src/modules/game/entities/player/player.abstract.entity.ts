@@ -36,7 +36,7 @@ export class BasePlayer {
 	}
 
 	set score(score: number) {
-		if (score > 0) {
+		if (score >= 0) {
 			this._score = score;
 		} else {
 			throw new AppError('Player score should be > 0');

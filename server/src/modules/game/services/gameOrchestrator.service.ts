@@ -13,7 +13,7 @@ import { JoinGameDTO } from '../dto/joinGame.dto';
 import { StartGameDTO } from '../dto/startGame.dto';
 import { IGameRepository } from '../redis-repository/game/game.repository.interface';
 import { IGameOrhestrator } from './gameOrchestrator.service.interface';
-import { PlayerQuestions, Round } from '../entities/round.entity';
+import { PlayerQuestions, Round, VotingResult } from '../entities/round.entity';
 import { IRoundService } from './round/round.service.interface';
 import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
 import { IRoundRepository } from '../redis-repository/round/round.repository.interface';
@@ -24,10 +24,13 @@ import { QuestionModel } from '../models/question.model';
 import { VotingDTO } from '../dto/voting.dto';
 import { Vote } from '../entities/vote.entity';
 import { VoteModel } from '../models/vote.model';
+import { CalcAnswerPointsDTO } from '../dto/calcPoints.dto';
+import { ILoggerService } from '../../../shared/logger/logger.service.interface';
 
 @injectable()
 export class GameOrchestrator implements IGameOrhestrator {
 	constructor(
+		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
 		@inject(TYPES.PlayerService) private readonly playerService: IPlayerService,
 		@inject(TYPES.PlayerRepository)
 		private readonly playerRepository: IPlayerRepository,
@@ -200,7 +203,77 @@ export class GameOrchestrator implements IGameOrhestrator {
 
 		await this.roundRepository.setRound(gameCode, round);
 
-		return round.votes as VoteModel[];
+		const voteModels: VoteModel[] = round.votes.map((v) => ({
+			voteId: v.voteId,
+			answerId: v.answerId,
+			playerName: v.playerName,
+		}));
+
+		return voteModels;
+	}
+
+	async calcAnswerPoints({
+		gameCode,
+		answerId1,
+		answerId2,
+		roundId,
+	}: CalcAnswerPointsDTO): Promise<[VotingResult, PlayerModel, PlayerModel]> {
+		let votes1: Vote[] = [];
+		let votes2: Vote[] = [];
+
+		try {
+			votes1 = await this.roundService.getVotesInstancesFromDB(
+				gameCode,
+				roundId,
+				answerId1,
+			);
+		} catch (error) {
+			this.logger.info(`Votes for answer ${answerId1} are not found`, this);
+		}
+
+		try {
+			votes2 = await this.roundService.getVotesInstancesFromDB(
+				gameCode,
+				roundId,
+				answerId2,
+			);
+		} catch (error) {
+			this.logger.info(`Votes for answer ${answerId2} are not found`, this);
+		}
+
+		const answer1 = await this.roundService.getAnswerInstanceFromDB(
+			gameCode,
+			roundId,
+			answerId1,
+		);
+		const answer2 = await this.roundService.getAnswerInstanceFromDB(
+			gameCode,
+			roundId,
+			answerId2,
+		);
+
+		const roundNumber = (await this.gameRepository.getGame(gameCode))!.currentRound;
+
+		const points = Round.calcPoints(
+			answer1,
+			answer2,
+			votes1.length,
+			votes2.length,
+			roundNumber,
+		);
+
+		const player1 = await this.playerService.updatePlayerScore(
+			gameCode,
+			answer1.playerName,
+			points.answer1.points,
+		);
+		const player2 = await this.playerService.updatePlayerScore(
+			gameCode,
+			answer2.playerName,
+			points.answer2.points,
+		);
+
+		return [points, player1, player2];
 	}
 
 	private isAnswerDublicates(
@@ -218,7 +291,7 @@ export class GameOrchestrator implements IGameOrhestrator {
 
 	private isDublicatedVote(votes: Vote[], v: Vote): boolean {
 		return votes.some(
-			(vote) => vote.answerId == v.answerId && v.playerName == v.playerName,
+			(vote) => vote.answerId == v.answerId && vote.playerName == v.playerName,
 		);
 	}
 }

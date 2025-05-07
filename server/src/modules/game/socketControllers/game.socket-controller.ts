@@ -13,6 +13,7 @@ import { TIME_TO_ANSWER, TIME_TO_VOTE, TIMER_ADDING } from '../constants';
 import { AnswerQuestionDTO } from '../dto/answerQuestion.dto';
 import { RequestQuestionForVotingDTO } from '../dto/requestQuestion.dto';
 import { VotingDTO } from '../dto/voting.dto';
+import { CalcAnswerPointsDTO } from '../dto/calcPoints.dto';
 
 @injectable()
 export class GameSocketController implements ISocketController {
@@ -41,6 +42,9 @@ export class GameSocketController implements ISocketController {
 		);
 		socket.on(EVENTS.voteForAnswer, (data: VotingDTO, callback: Function) =>
 			this.handleVoting(socket, io, data, callback),
+		);
+		socket.on(EVENTS.calcVotes, (data: CalcAnswerPointsDTO, callback: Function) =>
+			this.handleCalcAnswerPoints(socket, io, data, callback),
 		);
 	}
 
@@ -211,6 +215,38 @@ export class GameSocketController implements ISocketController {
 			});
 			io.in(data.gameCode).emit(EVENTS.sendVotes, {
 				data: votes,
+			});
+		} catch (error) {
+			callback({ status: '!OK', errors: error });
+		}
+	}
+
+	async handleCalcAnswerPoints(
+		socket: Socket,
+		io: Server,
+		data: CalcAnswerPointsDTO,
+		callback: Function,
+	): Promise<void> {
+		const errors = await ValidateMiddleware.validateDTO(CalcAnswerPointsDTO, data);
+		if (errors.length) {
+			callback({ status: '!OK', errors });
+			this.logger.error(`Validation data error: ${errors}`, this);
+			return;
+		}
+		try {
+			const [points, player1, player2] =
+				await this.mainService.calcAnswerPoints(data);
+
+			callback({
+				status: 'OK',
+				data: points,
+				player1,
+				player2,
+			});
+			io.in(data.gameCode).emit(EVENTS.pointsCalculated, {
+				data: points,
+				player1,
+				player2,
 			});
 		} catch (error) {
 			callback({ status: '!OK', errors: error });

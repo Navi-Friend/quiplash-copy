@@ -2,6 +2,7 @@ import { Round } from '../../entities/round.entity';
 import { AnswerModel } from '../../models/answer.model';
 import { QuestionModel } from '../../models/question.model';
 import { RoundModel } from '../../models/round.model';
+import { VoteModel } from '../../models/vote.model';
 
 export interface IRoundRepository {
 	setRound(gameCode: string, round: Round): Promise<RoundModel>;
@@ -16,4 +17,14 @@ export interface IRoundRepository {
 		roundId: string,
 		questionId: number,
 	): Promise<AnswerModel[] | null>;
+	getVotesByAnswerId(
+		gameCode: string,
+		roundId: string,
+		answerId: string,
+	): Promise<VoteModel[] | null>;
+	getAnswerById(
+		gameCode: string,
+		roundId: string,
+		answerId: string,
+	): Promise<AnswerModel | null>;
 }

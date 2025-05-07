@@ -10,6 +10,7 @@ import { ILoggerService } from '../../../../shared/logger/logger.service.interfa
 import { AppError } from '../../../../shared/errors/app/app.error';
 import { AnswerModel } from '../../models/answer.model';
 import { QuestionModel } from '../../models/question.model';
+import { VoteModel } from '../../models/vote.model';
 
 @injectable()
 export class RoundRepository extends BaseRedisRepository implements IRoundRepository {
@@ -110,6 +111,33 @@ export class RoundRepository extends BaseRedisRepository implements IRoundReposi
 		}
 	}
 
+	async getAnswerById(
+		gameCode: string,
+		roundId: string,
+		answerId: string,
+	): Promise<AnswerModel | null> {
+		try {
+			const result = (await this.redisService.redis.json.get(
+				`game:${gameCode}:rounds:${roundId}`,
+				{ path: `$.answers[?(@.answerId == "${answerId}")]` },
+			)) as unknown as AnswerModel[];
+
+			this.logger.debug(
+				`Answer is gotten from redis, ${JSON.stringify(result, null, 2)}`,
+				this,
+			);
+
+			if (!result) {
+				return null;
+			}
+
+			return result[0] as unknown as AnswerModel;
+		} catch (error) {
+			this.logger.error(`Answer is not gotten from redis, ${error}`, this);
+			throw new AppError(`Error while getting Answer from redis`, error as Error);
+		}
+	}
+
 	async getQuestionById(
 		gameCode: string,
 		roundId: string,
@@ -134,6 +162,33 @@ export class RoundRepository extends BaseRedisRepository implements IRoundReposi
 		} catch (error) {
 			this.logger.error(`Question is not gotten from redis, ${error}`, this);
 			throw new AppError(`Error while getting Question from redis`, error as Error);
+		}
+	}
+
+	async getVotesByAnswerId(
+		gameCode: string,
+		roundId: string,
+		answerId: string,
+	): Promise<VoteModel[] | null> {
+		try {
+			const result = (await this.redisService.redis.json.get(
+				`game:${gameCode}:rounds:${roundId}`,
+				{ path: `$.votes[?(@.answerId == "${answerId}")]` },
+			)) as QuestionModel[] | null;
+
+			this.logger.debug(
+				`Votes are gotten from redis, ${JSON.stringify(result, null, 2)}`,
+				this,
+			);
+
+			if (!result) {
+				return null;
+			}
+
+			return result as unknown as VoteModel[];
+		} catch (error) {
+			this.logger.error(`Votes are not gotten from redis, ${error}`, this);
+			throw new AppError(`Error while getting Votes from redis`, error as Error);
 		}
 	}
 }
