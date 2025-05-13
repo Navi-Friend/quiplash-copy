@@ -10,8 +10,7 @@ export class SocketServer {
 	constructor(@inject(TYPES.HTTPServer) httpServer: HTTPServer) {
 		this._io = new Server(httpServer.server, {
 			cors: {
-				origin: ['https://admin.socket.io'],
-				// ["https://admin.socket.io"],
+				origin: ['https://admin.socket.io', 'http://localhost:5173'],
 				credentials: true,
 			},
 		});
