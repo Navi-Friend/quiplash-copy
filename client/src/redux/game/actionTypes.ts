@@ -1,4 +1,4 @@
-export type SocketAction =
+export type GameSocketAction =
   | { type: "game/initGame"; payload: { playerName: string } }
   | {
       type: "game/joinGame";

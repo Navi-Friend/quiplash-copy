@@ -5,12 +5,14 @@ export interface GameState {
   players: Player[];
   currentRound: number;
   gameCode: string;
+  playerNumber: number | null;
 }
 
 const initialState: GameState = {
   players: [],
   currentRound: 0,
   gameCode: "",
+  playerNumber: null,
 };
 
 const gameSlice = createSlice({
@@ -37,6 +39,9 @@ const gameSlice = createSlice({
     setGameCode: (state, action: PayloadAction<string>) => {
       state.gameCode = action.payload;
     },
+    setPlayerNumber: (state, action: PayloadAction<number>) => {
+      state.playerNumber = action.payload;
+    },
   },
 });
 
@@ -46,6 +51,7 @@ export const {
   // addAnswer,
   // addVote,
   // setGameStatus,
+  setPlayerNumber,
   setGameCode,
 } = gameSlice.actions;
 export default gameSlice.reducer;

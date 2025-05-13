@@ -2,3 +2,28 @@ export interface Player {
   playerName: string;
   score: number;
 }
+
+export type SocketAnswer<T> = {
+  status: "OK" | "!OK";
+  data?: T;
+  errors?: SocketAnswerError;
+};
+
+export interface InitGame {
+  game: {
+    currentPlayers: number;
+    currentRound: number;
+    gameCode: string;
+    gameStatus: string;
+    maxPlayers: number;
+    spectators: number;
+    totalRounds: number;
+  };
+}
+
+export interface SocketAnswerError {
+  name: string;
+  message: string;
+  timestamp: string;
+  details?: string;
+}

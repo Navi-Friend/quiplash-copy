@@ -1,5 +1,5 @@
 import { Middleware } from "@reduxjs/toolkit";
-import { SocketAction } from "./actionTypes";
+import { GameSocketAction } from "./actionTypes";
 import {
   // setPlayers,
   // setQuestion,
@@ -8,8 +8,10 @@ import {
   // setGameStatus,
   GameState,
   setGameCode,
+  setPlayerNumber,
 } from "./gameSlice";
 import { socket } from "@/api/socket";
+import { InitGame, SocketAnswer } from "@/types";
 
 export const gameSocketMiddleware =
   (): Middleware<{}, { game: GameState }> =>
@@ -20,20 +22,18 @@ export const gameSocketMiddleware =
     // if (action.type === "socket/connect") {
     // Подписка на события от сервера
 
-    const isSocketAction = (action: unknown): action is SocketAction =>
-      typeof action === "object" &&
-      action !== null &&
-      "type" in action &&
-      typeof action.type === "string";
-
-    if (!isSocketAction(action)) {
+    if (!isGameSocketAction(action)) {
       return next(action);
     }
 
     if (action.type == "game/initGame") {
-      const response = await socket.emitWithAck("initGame", action.payload);
-      console.log(response);
-      store.dispatch(setGameCode(response));
+      const response = (await socket.emitWithAck(
+        "initGame",
+        action.payload
+      )) as SocketAnswer<InitGame>;
+      console.log(response, response.data!.game.gameCode);
+      store.dispatch(setGameCode(response.data!.game.gameCode));
+      store.dispatch(setPlayerNumber(response.data!.game.currentPlayers));
     }
 
     // socket.on("players_update", (players) => {
@@ -72,3 +72,10 @@ export const gameSocketMiddleware =
 
     return next(action);
   };
+
+const isGameSocketAction = (action: unknown): action is GameSocketAction =>
+  typeof action === "object" &&
+  action !== null &&
+  "type" in action &&
+  typeof action.type === "string" &&
+  (action.type == "game/initGame" || action.type == "game/joinGame");

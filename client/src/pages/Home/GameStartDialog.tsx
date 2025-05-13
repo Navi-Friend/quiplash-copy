@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/";
 import { Input } from "@/components/ui/";
 import { useAppDispatch } from "@/hooks/redux";
-import { SocketAction } from "@/redux/game/actionTypes";
+import { GameSocketAction } from "@/redux/game/actionTypes";
+import { PlayerSocketAction } from "@/redux/player/actionTypes";
 
 interface CustomDialogProps {
   isOpen: boolean;
@@ -20,10 +21,15 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
   const [playerName, setPlayerName] = useState<string | null>(null);
   const dispatch = useAppDispatch();
 
-  const handleCreateRoom = () => {
-    dispatch<SocketAction>({
+  const handleCreateRoom = async () => {
+    await dispatch<GameSocketAction>({
       type: "game/initGame",
       payload: { playerName } as { playerName: string },
+    });
+    
+    dispatch<PlayerSocketAction>({
+      type: "player/createPlayer",
+      payload: { status: "VIP", playerName } as PlayerSocketAction["payload"],
     });
   };
 
