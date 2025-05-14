@@ -8,7 +8,6 @@ import { PlayerState, setPlayer } from "./playerSlice";
 import { PlayerSocketAction } from "./actionTypes";
 import { socket } from "@/api/socket";
 import { GameState } from "../game/gameSlice";
-import path from "path";
 
 export const playerSocketMiddleware =
   (): Middleware<{}, { player: PlayerState; game: GameState }> =>
@@ -63,5 +62,5 @@ const resolveAvatar = (
   const playerNumber = store.getState().game.playerNumber as number;
   const avatarName = playerNumberToAvatar[playerNumber];
 
-  return `../../../public/${avatarName}`; 
+  return `../../../public/${avatarName}.webp`; 
 };

@@ -27,3 +27,13 @@ export interface SocketAnswerError {
   timestamp: string;
   details?: string;
 }
+
+export interface JoinGame {
+  player: PlayerModel;
+}
+
+export interface PlayerModel {
+  playerId: string;
+  name: string;
+  score: number;
+}

@@ -1,6 +1,7 @@
 import { Middleware } from "@reduxjs/toolkit";
 import { GameSocketAction } from "./actionTypes";
 import {
+  addError,
   // setPlayers,
   // setQuestion,
   // addAnswer,
@@ -11,7 +12,8 @@ import {
   setPlayerNumber,
 } from "./gameSlice";
 import { socket } from "@/api/socket";
-import { InitGame, SocketAnswer } from "@/types";
+import { InitGame, JoinGame, PlayerModel, SocketAnswer } from "@/types";
+import { EVENTS } from "@/api/events";
 
 export const gameSocketMiddleware =
   (): Middleware<{}, { game: GameState }> =>
@@ -28,13 +30,41 @@ export const gameSocketMiddleware =
 
     if (action.type == "game/initGame") {
       const response = (await socket.emitWithAck(
-        "initGame",
+        EVENTS.initGame,
         action.payload
       )) as SocketAnswer<InitGame>;
       console.log(response, response.data!.game.gameCode);
       store.dispatch(setGameCode(response.data!.game.gameCode));
       store.dispatch(setPlayerNumber(response.data!.game.currentPlayers));
     }
+
+    if (action.type == "game/joinGame") {
+      console.log(action.payload)
+      const response = (await socket.emitWithAck(
+        EVENTS.joinGame,
+        action.payload
+      )) as SocketAnswer<JoinGame>;
+
+      if (response.data) {
+        console.log(response, response.data!.player.name);
+        store.dispatch(setGameCode(action.payload.gameCode));
+        store.dispatch(addError(null))
+      }
+      if (response.errors) {
+        store.dispatch(addError(response.errors));
+        console.log(store.getState().game.error)
+      }
+    }
+
+    socket.on(EVENTS.playerJoined, (data: SocketAnswer<PlayerModel[]>) => {
+      const myPlayer = data.data!.find(
+        (p) => p.name === action.payload.playerName
+      ) as PlayerModel;
+      const myPlayerNumber = data.data!.indexOf(myPlayer);
+      console.log(data)
+      console.log(myPlayer, myPlayerNumber);
+      store.dispatch(setPlayerNumber(myPlayerNumber));
+    });
 
     // socket.on("players_update", (players) => {
     //   store.dispatch(setPlayers(players));

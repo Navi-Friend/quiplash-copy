@@ -1,4 +1,4 @@
-import { Player } from "@/types";
+import { Player, SocketAnswerError } from "@/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface GameState {
@@ -6,6 +6,7 @@ export interface GameState {
   currentRound: number;
   gameCode: string;
   playerNumber: number | null;
+  error: SocketAnswerError | null;
 }
 
 const initialState: GameState = {
@@ -13,6 +14,7 @@ const initialState: GameState = {
   currentRound: 0,
   gameCode: "",
   playerNumber: null,
+  error: null,
 };
 
 const gameSlice = createSlice({
@@ -21,6 +23,16 @@ const gameSlice = createSlice({
   reducers: {
     setPlayers: (state, action: PayloadAction<Player[]>) => {
       state.players = action.payload;
+    },
+    addError: (state, action: PayloadAction<typeof state.error>) => {
+      if (action.payload) {
+        const existing = state.error?.message == action.payload.message;
+        if (!existing) {
+          state.error = action.payload;
+        }
+      } else {
+        state.error = null;
+      }
     },
     // setQuestion: (state, action) => {
     //   state.currentQuestion = action.payload;
@@ -47,6 +59,7 @@ const gameSlice = createSlice({
 
 export const {
   setPlayers,
+  addError,
   // setQuestion,
   // addAnswer,
   // addVote,

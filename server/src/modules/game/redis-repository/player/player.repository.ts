@@ -68,7 +68,7 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 				score: player.score,
 			};
 			await this.createPlayersArrIfNotExists(gameCode);
-
+			console.log(gameCode)
 			await this.redisService.redis.json.arrAppend(
 				`game:${gameCode}:players`,
 				'$',
@@ -82,7 +82,7 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 
 			return playerModel;
 		} catch (error) {
-			this.logger.error('Player is not set to redis', this);
+			this.logger.error(`Player is not set to redis: ${error}`, this);
 			throw new AppError('Error while set player', error as Error);
 		}
 	}

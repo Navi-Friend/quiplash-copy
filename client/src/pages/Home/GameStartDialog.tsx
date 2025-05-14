@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,9 +7,10 @@ import {
 } from "@/components/ui/";
 import { Button } from "@/components/ui/";
 import { Input } from "@/components/ui/";
-import { useAppDispatch } from "@/hooks/redux";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { GameSocketAction } from "@/redux/game/actionTypes";
 import { PlayerSocketAction } from "@/redux/player/actionTypes";
+import { SocketAnswerError } from "@/types";
 
 interface CustomDialogProps {
   isOpen: boolean;
@@ -20,25 +21,45 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
   const [roomCode, setRoomCode] = useState("");
   const [playerName, setPlayerName] = useState<string | null>(null);
   const dispatch = useAppDispatch();
+  const gameState = useAppSelector((state) => state.game);
+  const playerState = useAppSelector((state) => state.player);
+  
 
   const handleCreateRoom = async () => {
     await dispatch<GameSocketAction>({
       type: "game/initGame",
       payload: { playerName } as { playerName: string },
     });
-    
+
     dispatch<PlayerSocketAction>({
       type: "player/createPlayer",
       payload: { status: "VIP", playerName } as PlayerSocketAction["payload"],
     });
   };
 
-  const handleJoinRoom = () => {
+  const handleJoinRoom = async () => {
     if (roomCode.length === 4) {
-      // TODO: Implement room joining logic
-      // navigate(routes.game);
+      await dispatch<GameSocketAction>({
+        type: "game/joinGame",
+        payload: { playerName, gameCode: roomCode } as {
+          playerName: string;
+          gameCode: string;
+        },
+      });
     }
   };
+
+  useEffect(() => {
+    if (gameState.gameCode && playerState.status != "VIP") {
+      dispatch<PlayerSocketAction>({
+        type: "player/createPlayer",
+        payload: {
+          status: "normal",
+          playerName,
+        } as PlayerSocketAction["payload"],
+      });
+    }
+  }, [gameState.error, gameState.gameCode]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -74,13 +95,16 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
             <div className="space-y-3">
               <h3 className="text-lg font-medium">Присоединиться к комнате</h3>
               <div className="flex gap-2">
-                <Input
-                  placeholder="Q4ZW"
-                  maxLength={4}
-                  value={roomCode}
-                  onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  className="text-center text-xl tracking-widest"
-                />
+                <div className="w-full">
+                  <Input
+                    placeholder="Q4ZW"
+                    maxLength={4}
+                    value={roomCode.trim()}
+                    onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                    className="text-center text-xl tracking-widest"
+                  />
+                  {gameState.error && <div className="text-red-700">{gameState.error.message}</div>}
+                </div>
                 <Button
                   className="bg-purple-600 hover:bg-purple-700 text-white"
                   onClick={handleJoinRoom}

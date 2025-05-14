@@ -66,19 +66,27 @@ export class GameOrchestrator implements IGameOrhestrator {
 		if (isPlayerExists) {
 			throw new AppError('Player with this name is already exists');
 		}
+		try {
+			const newPlayer = Player.createNew(playerName);
 
-		const newPlayer = Player.createNew(playerName);
+			await this.gameService.addPlayerToGame(gameCode);
 
-		await this.gameService.addPlayerToGame(gameCode);
+			const playerModel = await this.playerRepository.setPlayer(
+				gameCode,
+				newPlayer,
+			);
+			const players = (await this.playerRepository.getPlayers(
+				gameCode,
+			)) as PlayerModel[];
 
-		const playerModel = await this.playerRepository.setPlayer(gameCode, newPlayer);
-		const players = (await this.playerRepository.getPlayers(
-			gameCode,
-		)) as PlayerModel[];
+			const vip = (await this.playerRepository.getVIPPlayer(
+				gameCode,
+			)) as PlayerModel;
 
-		const vip = (await this.playerRepository.getVIPPlayer(gameCode)) as PlayerModel;
-
-		return [playerModel, [vip, ...players]];
+			return [playerModel, [vip, ...players]];
+		} catch (error) {
+			throw error;
+		}
 	}
 
 	async startGame({
