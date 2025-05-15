@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { routes } from "./lib/routes.ts";
-import { Error, Home, Rules } from "./pages/index.ts";
+import { Error, Home, PlayersLobby, Rules } from "./pages/index.ts";
 import { Wrapper } from "./components/layout/Wrapper.tsx";
 import { Provider } from "react-redux";
 import store from "./redux/store.ts";
@@ -16,12 +16,14 @@ const router = createBrowserRouter([
       {
         path: routes.home,
         element: <Home />,
-        // errorElement: <Error />,
       },
       {
         path: routes.rules,
         element: <Rules />,
-        // errorElement: <Error />,
+      },
+      {
+        path: routes.playersLobby,
+        element: <PlayersLobby />,
       },
     ],
   },

@@ -21,7 +21,7 @@ export class PlayerService implements IPlayerService {
 		if (existingVIP) {
 			throw new AppError('VIP Player is already exists');
 		}
-		const vip = VIPPlayer.createNew(name);
+		const vip = VIPPlayer.createNew(name, 1);
 		return await this.playerRepository.setVIPPlayer(gameCode, vip);
 	}
 

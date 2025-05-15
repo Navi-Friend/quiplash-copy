@@ -11,13 +11,13 @@ import { BaseRedisRepository } from '../../../../shared/redis/base.repository';
 
 @injectable()
 export class PlayerRepository extends BaseRedisRepository implements IPlayerRepository {
-	private _isPlayersArrExists: boolean;
+	private _isPlayersArrExists: string[];
 	constructor(
 		@inject(TYPES.RedisService) private readonly redisService: RedisService,
 		@inject(TYPES.LoggerService) private readonly logger: ILoggerService,
 	) {
 		super();
-		this._isPlayersArrExists = false;
+		this._isPlayersArrExists = [];
 	}
 
 	async setVIPPlayer(gameCode: string, vip: VIPPlayer): Promise<PlayerModel> {
@@ -25,6 +25,7 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 			const vipModel: PlayerModel = {
 				playerId: vip.playerId,
 				name: vip.name,
+				avatarNumber: vip.avatarNumber || -1,
 				score: vip.score,
 			};
 
@@ -65,10 +66,10 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 			const playerModel: PlayerModel = {
 				playerId: player.playerId,
 				name: player.name,
+				avatarNumber: player.avatarNumber || -1,
 				score: player.score,
 			};
 			await this.createPlayersArrIfNotExists(gameCode);
-			console.log(gameCode)
 			await this.redisService.redis.json.arrAppend(
 				`game:${gameCode}:players`,
 				'$',
@@ -137,15 +138,17 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 			? {
 					playerId: data.playerId,
 					name: data.name,
+					avatarNumber: parseInt(data.avatarNumber),
 					score: parseInt(data.score),
 				}
 			: null;
 	}
 
 	private async createPlayersArrIfNotExists(gameCode: string): Promise<void> {
-		if (!this._isPlayersArrExists) {
+		console.log(this._isPlayersArrExists);
+		if (!this._isPlayersArrExists.includes(gameCode)) {
 			await this.redisService.redis.json.set(`game:${gameCode}:players`, '$', []);
-			this._isPlayersArrExists = true;
+			this._isPlayersArrExists.push(gameCode);
 		}
 	}
 }

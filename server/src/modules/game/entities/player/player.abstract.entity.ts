@@ -7,17 +7,29 @@ export class BasePlayer {
 		private _name: string,
 		private _playerId: string,
 		private _score: number = 0,
+		public avatarNumber?: number,
 	) {}
 
 	static createNew<T extends BasePlayer>(
-		this: new (name: string, playerId: string, score?: number) => T,
+		this: new (
+			name: string,
+			playerId: string,
+			score?: number,
+			avatarNumber?: number,
+		) => T,
 		name: string,
+		avatarNumber?: number,
 	): T {
-		return new this(name, v4());
+		return new this(name, v4(), 0, avatarNumber);
 	}
 
 	static restore<T extends BasePlayer>(
-		this: new (name: string, playerId: string, score?: number) => T,
+		this: new (
+			name: string,
+			playerId: string,
+			score?: number,
+			avatarNumber?: number,
+		) => T,
 		data: PlayerModel,
 	): T {
 		return new this(data.name, data.playerId, data.score);

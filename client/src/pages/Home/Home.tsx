@@ -7,7 +7,6 @@ import { useState } from "react";
 export function Home() {
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   return (
     <div>
       <h1 className="text-6xl font-bold text-white mb-8 animate-bounce">
@@ -22,10 +21,7 @@ export function Home() {
         >
           Играть
         </Button>
-        <GameStartDialog
-          isOpen={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-        />
+        <GameStartDialog isOpen={isDialogOpen} onOpenChange={setIsDialogOpen} />
 
         <Button
           size="lg"

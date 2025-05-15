@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,57 +9,62 @@ import { Button } from "@/components/ui/";
 import { Input } from "@/components/ui/";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { GameSocketAction } from "@/redux/game/actionTypes";
-import { PlayerSocketAction } from "@/redux/player/actionTypes";
-import { SocketAnswerError } from "@/types";
+import { useLocation, useNavigate } from "react-router-dom";
+import { routes } from "@/lib/routes";
+import { setShouldNavigateToHome } from "@/redux/game/gameSlice";
 
 interface CustomDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
+export const GameStartDialog = memo(function GameStartDialog({
+  isOpen,
+  onOpenChange,
+}: CustomDialogProps) {
   const [roomCode, setRoomCode] = useState("");
   const [playerName, setPlayerName] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const gameState = useAppSelector((state) => state.game);
-  const playerState = useAppSelector((state) => state.player);
-  
+  const navigate = useNavigate();
 
-  const handleCreateRoom = async () => {
-    await dispatch<GameSocketAction>({
+  const handleCreateRoom = () => {
+    dispatch<GameSocketAction>({
       type: "game/initGame",
-      payload: { playerName } as { playerName: string },
+      payload: { playerName, status: "VIP" } as {
+        playerName: string;
+        status: "VIP";
+      },
     });
 
-    dispatch<PlayerSocketAction>({
-      type: "player/createPlayer",
-      payload: { status: "VIP", playerName } as PlayerSocketAction["payload"],
-    });
+    if (gameState.player && !gameState.error) {
+      navigate(routes.playersLobby);
+    }
   };
 
-  const handleJoinRoom = async () => {
+  const handleJoinRoom = () => {
     if (roomCode.length === 4) {
-      await dispatch<GameSocketAction>({
+      dispatch<GameSocketAction>({
         type: "game/joinGame",
         payload: { playerName, gameCode: roomCode } as {
           playerName: string;
           gameCode: string;
+          status: "normal";
         },
       });
     }
   };
 
   useEffect(() => {
-    if (gameState.gameCode && playerState.status != "VIP") {
-      dispatch<PlayerSocketAction>({
-        type: "player/createPlayer",
-        payload: {
-          status: "normal",
-          playerName,
-        } as PlayerSocketAction["payload"],
-      });
+    if (
+      gameState.player &&
+      !gameState.error &&
+      gameState.shouldNavigateToHome
+    ) {
+      dispatch(setShouldNavigateToHome(false));
+      navigate(routes.playersLobby);
     }
-  }, [gameState.error, gameState.gameCode]);
+  }, [gameState.player, gameState.error]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -103,7 +108,11 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                     className="text-center text-xl tracking-widest"
                   />
-                  {gameState.error && <div className="text-red-700">{gameState.error.message}</div>}
+                  {gameState.error && (
+                    <div className="text-red-700">
+                      {gameState.error.message}
+                    </div>
+                  )}
                 </div>
                 <Button
                   className="bg-purple-600 hover:bg-purple-700 text-white"
@@ -119,4 +128,4 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
       </DialogContent>
     </Dialog>
   );
-}
+});

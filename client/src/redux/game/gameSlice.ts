@@ -1,28 +1,38 @@
 import { Player, SocketAnswerError } from "@/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export interface PlayerState extends Player {
+  status: "VIP" | "normal" | "spectator" | null;
+  avatarURL: string;
+}
+
 export interface GameState {
-  players: Player[];
+  players: PlayerState[];
+  player: PlayerState | null;
   currentRound: number;
   gameCode: string;
-  playerNumber: number | null;
   error: SocketAnswerError | null;
+  shouldNavigateToHome?: boolean;
 }
 
 const initialState: GameState = {
   players: [],
+  player: null,
   currentRound: 0,
   gameCode: "",
-  playerNumber: null,
   error: null,
+  shouldNavigateToHome: true,
 };
 
 const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
-    setPlayers: (state, action: PayloadAction<Player[]>) => {
+    setPlayers: (state, action: PayloadAction<PlayerState[]>) => {
       state.players = action.payload;
+    },
+    setPlayer: (state, action: PayloadAction<PlayerState>) => {
+      state.player = action.payload;
     },
     addError: (state, action: PayloadAction<typeof state.error>) => {
       if (action.payload) {
@@ -34,37 +44,24 @@ const gameSlice = createSlice({
         state.error = null;
       }
     },
-    // setQuestion: (state, action) => {
-    //   state.currentQuestion = action.payload;
-    // },
-    // addAnswer: (state, action) => {
-    //   const { playerId, answer } = action.payload;
-    //   state.answers[playerId] = answer;
-    // },
-    // addVote: (state, action) => {
-    //   const { voterId, answerId } = action.payload;
-    //   state.votes[voterId] = answerId;
-    // },
-    // setGameStatus: (state, action) => {
-    //   state.gameStatus = action.payload;
-    // },
+    setShouldNavigateToHome: (state, action: PayloadAction<boolean>) => {
+      state.shouldNavigateToHome = action.payload;
+    },
+
     setGameCode: (state, action: PayloadAction<string>) => {
       state.gameCode = action.payload;
     },
-    setPlayerNumber: (state, action: PayloadAction<number>) => {
-      state.playerNumber = action.payload;
-    },
+    // setPlayerNumber: (state, action: PayloadAction<number>) => {
+    //   state.playerNumber = action.payload;
+    // },
   },
 });
 
 export const {
   setPlayers,
+  setPlayer,
   addError,
-  // setQuestion,
-  // addAnswer,
-  // addVote,
-  // setGameStatus,
-  setPlayerNumber,
+  setShouldNavigateToHome,
   setGameCode,
 } = gameSlice.actions;
 export default gameSlice.reducer;

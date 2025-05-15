@@ -69,7 +69,8 @@ export class GameOrchestrator implements IGameOrhestrator {
 		try {
 			const newPlayer = Player.createNew(playerName);
 
-			await this.gameService.addPlayerToGame(gameCode);
+			const gameModel = await this.gameService.addPlayerToGame(gameCode);
+			newPlayer.avatarNumber = gameModel.currentPlayers;
 
 			const playerModel = await this.playerRepository.setPlayer(
 				gameCode,
@@ -78,7 +79,6 @@ export class GameOrchestrator implements IGameOrhestrator {
 			const players = (await this.playerRepository.getPlayers(
 				gameCode,
 			)) as PlayerModel[];
-
 			const vip = (await this.playerRepository.getVIPPlayer(
 				gameCode,
 			)) as PlayerModel;

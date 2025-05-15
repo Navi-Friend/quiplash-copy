@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "../ui";
+import { Button } from "../../components/ui";
 import { routes } from "@/lib/routes";
 
 export function HomeButton() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <Button
       size="lg"

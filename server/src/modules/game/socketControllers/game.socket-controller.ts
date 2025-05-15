@@ -87,8 +87,8 @@ export class GameSocketController implements ISocketController {
 			const [player, players] = await this.mainService.addPlayer(data);
 
 			await socket.join(data.gameCode);
-			io.in(data.gameCode).emit(EVENTS.playerJoined, { data: players });
 			callback({ status: 'OK', data: { player } });
+			io.in(data.gameCode).emit(EVENTS.playerJoined, { data: players });
 		} catch (error) {
 			callback({ status: '!OK', errors: error });
 		}

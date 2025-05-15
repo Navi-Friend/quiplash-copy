@@ -1,5 +1,5 @@
-import { HomeButton } from "@/components/common";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/";
+import { HomeButton } from "./HomeButton";
 
 export function Rules() {
   return (
