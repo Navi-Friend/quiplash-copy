@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/";
 import { HomeButton } from "./HomeButton";
-=======
-import { HomeButton } from "@/components/common";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/";
->>>>>>> 4232884e57e49db34666d24b5f40adfa7e408675
 
 export function Rules() {
   return (

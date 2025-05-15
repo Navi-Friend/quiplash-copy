@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/";
 import { Input } from "@/components/ui/";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { GameSocketAction } from "@/redux/game/actionTypes";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { routes } from "@/lib/routes";
 import { setShouldNavigateToHome } from "@/redux/game/gameSlice";
 
@@ -18,10 +18,7 @@ interface CustomDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const GameStartDialog = memo(function GameStartDialog({
-  isOpen,
-  onOpenChange,
-}: CustomDialogProps) {
+export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
   const [roomCode, setRoomCode] = useState("");
   const [playerName, setPlayerName] = useState<string | null>(null);
   const dispatch = useAppDispatch();
@@ -128,4 +125,4 @@ export const GameStartDialog = memo(function GameStartDialog({
       </DialogContent>
     </Dialog>
   );
-});
+}

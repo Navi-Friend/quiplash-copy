@@ -1,7 +1,6 @@
 export interface Player {
   playerName: string;
   score: number;
-<<<<<<< HEAD
 }
 
 export type SocketAnswer<T> = {
@@ -39,6 +38,3 @@ export interface PlayerModel {
   score: number;
   avatarNumber: number;
 }
-=======
-}
->>>>>>> 4232884e57e49db34666d24b5f40adfa7e408675
