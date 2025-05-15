@@ -11,7 +11,6 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { GameSocketAction } from "@/redux/game/actionTypes";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@/lib/routes";
-import { setShouldNavigateToHome } from "@/redux/game/gameSlice";
 
 interface CustomDialogProps {
   isOpen: boolean;
@@ -33,10 +32,6 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
         status: "VIP";
       },
     });
-
-    if (gameState.player && !gameState.error) {
-      navigate(routes.playersLobby);
-    }
   };
 
   const handleJoinRoom = () => {
@@ -53,12 +48,8 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
   };
 
   useEffect(() => {
-    if (
-      gameState.player &&
-      !gameState.error &&
-      gameState.shouldNavigateToHome
-    ) {
-      dispatch(setShouldNavigateToHome(false));
+    if (gameState.player && !gameState.error) {
+      // console.log(gameState.shouldNavigateToHome);
       navigate(routes.playersLobby);
     }
   }, [gameState.player, gameState.error]);

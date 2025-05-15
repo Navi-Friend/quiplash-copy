@@ -12,7 +12,6 @@ export interface GameState {
   currentRound: number;
   gameCode: string;
   error: SocketAnswerError | null;
-  shouldNavigateToHome?: boolean;
 }
 
 const initialState: GameState = {
@@ -21,7 +20,6 @@ const initialState: GameState = {
   currentRound: 0,
   gameCode: "",
   error: null,
-  shouldNavigateToHome: true,
 };
 
 const gameSlice = createSlice({
@@ -44,21 +42,17 @@ const gameSlice = createSlice({
         state.error = null;
       }
     },
-    setShouldNavigateToHome: (state, action: PayloadAction<boolean>) => {
-      state.shouldNavigateToHome = action.payload;
-    },
+    // setShouldNavigateToHome: (state, action: PayloadAction<boolean>) => {
+    //   state.shouldNavigateToHome = action.payload;
+    // },
 
     setGameCode: (state, action: PayloadAction<string>) => {
       state.gameCode = action.payload;
     },
+    resetState: () => initialState,
   },
 });
 
-export const {
-  setPlayers,
-  setPlayer,
-  addError,
-  setShouldNavigateToHome,
-  setGameCode,
-} = gameSlice.actions;
+export const { setPlayers, setPlayer, addError, setGameCode, resetState } =
+  gameSlice.actions;
 export default gameSlice.reducer;
