@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -20,3 +21,11 @@ export const resolveAvatar = (playerNumber: number): string => {
   const avatarName = playerNumberToAvatar[playerNumber];
   return `../../../public/${avatarName}.webp`;
 };
+=======
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+>>>>>>> 4232884e57e49db34666d24b5f40adfa7e408675
