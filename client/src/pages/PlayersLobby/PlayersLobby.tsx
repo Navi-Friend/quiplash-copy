@@ -1,14 +1,33 @@
-import { useAppSelector } from "@/hooks/redux";
-import { BackButton } from "../../components/common/BackButton";
-import { Avatar } from "./Avatar";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { Button } from "@/components/ui";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { Avatar, BackButton } from "@/components/common";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import { GameSocketAction } from "@/redux/game/actionTypes";
 
 export function PlayersLobby() {
   const gameState = useAppSelector((store) => store.game);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const handleStartGame = () => {};
+  const handleStartGame = () => {
+    dispatch<GameSocketAction>({ type: "game/startGame" });
+    // navigate(routes.answerPage);
+  };
+
+  useEffect(() => {
+    if (gameState.timer && !gameState.error) {
+      navigate(routes.answerPage);
+    }
+    if (gameState.error && !toast.isActive("warnToast")) {
+      toast.warn(gameState.error.message, {
+        toastId: "warnToast",
+      });
+    }
+  }, [gameState.timer, gameState.error]);
 
   return (
     <>
@@ -29,13 +48,13 @@ export function PlayersLobby() {
           {gameState.gameCode || "EMPTY"}
         </div>
         {gameState.player?.status == "VIP" && (
-          <div className="mt-20 ml-[-5px]">
+          <div className="mt-20">
             <div className="pb-4 font-bold text-2xl text-shadow-[3px_2px_4px_rgb(30,30,30)]">
               Нажми чтобы начать!
             </div>
 
             <Button
-              className="text-5xl rounded-3xl shadow-[5px_5px_4px_rgb(30,30,30)] font-extrabold p-9 border-black border-3 hover:scale-110"
+              className="text-5xl rounded-3xl shadow-[5px_5px_4px_rgb(30,30,30)] font-extrabold ml-[-8px] p-9 border-black border-3 hover:scale-110"
               onClick={() => handleStartGame()}
             >
               Все здесь

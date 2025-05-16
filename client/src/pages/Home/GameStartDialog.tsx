@@ -12,6 +12,8 @@ import { GameSocketAction } from "@/redux/game/actionTypes";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@/lib/routes";
 
+const MAX_NAME_LENGTH = 15;
+
 interface CustomDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -49,7 +51,6 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
 
   useEffect(() => {
     if (gameState.player && !gameState.error) {
-      // console.log(gameState.shouldNavigateToHome);
       navigate(routes.playersLobby);
     }
   }, [gameState.player, gameState.error]);
@@ -71,6 +72,7 @@ export function GameStartDialog({ isOpen, onOpenChange }: CustomDialogProps) {
               className="bg-white"
               id="player-name-input"
               type="text"
+              maxLength={MAX_NAME_LENGTH}
               onChange={(e) => setPlayerName(e.target.value)}
             ></Input>
           </div>

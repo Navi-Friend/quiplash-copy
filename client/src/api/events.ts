@@ -5,7 +5,7 @@ export const EVENTS = {
   startGame: "startGame",
   gameStarted: "gameStarted",
   answerQuestion: "answerQuestion",
-  playerAsked: "playerAsked",
+  playerAnswered: "playerAnswered",
   requestQuestionForVoting: "requestQuestionForVoting",
   questionForVotiong: "questionForVotiong",
   voteForAnswer: "voteForAnswer",

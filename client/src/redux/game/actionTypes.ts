@@ -12,4 +12,25 @@ export type GameSocketAction =
         gameCode: string;
         status: PlayerState["status"];
       };
+    }
+  | {
+      type: "game/startGame";
+    }
+  | {
+      type: "game/sendAnswer";
+      payload: {
+        playerName: string;
+        gameCode: string;
+        answer: string;
+        questionId: number;
+        roundId: string;
+      };
+    }
+  | {
+      type: "game/questionForVoting";
+      payload: {
+        questionId: number;
+        roundId: string;
+        gameCode: string;
+      };
     };

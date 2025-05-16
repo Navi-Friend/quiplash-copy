@@ -7,6 +7,8 @@ import { Error, Home, PlayersLobby, Rules } from "./pages/index.ts";
 import { Wrapper } from "./components/layout/Wrapper.tsx";
 import { Provider } from "react-redux";
 import store from "./redux/store.ts";
+import { AnswerPage } from "./pages/AnswerPage/AnswerPage.tsx";
+import { Bounce, ToastContainer } from "react-toastify";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +27,10 @@ const router = createBrowserRouter([
         path: routes.playersLobby,
         element: <PlayersLobby />,
       },
+      {
+        path: routes.answerPage,
+        element: <AnswerPage />,
+      },
     ],
   },
 ]);
@@ -32,6 +38,20 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        limit={1}
+        stacked={false}
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
       <RouterProvider router={router} />
     </Provider>
   </StrictMode>

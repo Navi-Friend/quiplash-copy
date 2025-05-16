@@ -112,6 +112,7 @@ export class GameSocketController implements ISocketController {
 
 			const startTime = Date.now() + TIMER_ADDING;
 
+			callback({ status: 'OK', data: { gameModel } });
 			io.to(data.gameCode).emit(EVENTS.gameStarted, {
 				data: {
 					game: gameModel,
@@ -122,8 +123,6 @@ export class GameSocketController implements ISocketController {
 					duration: TIME_TO_ANSWER,
 				},
 			});
-
-			callback({ status: 'OK', data: { gameModel } });
 		} catch (error) {
 			callback({ status: '!OK', errors: error });
 		}
@@ -144,8 +143,8 @@ export class GameSocketController implements ISocketController {
 		try {
 			await this.mainService.registerAnswer(data);
 
-			io.in(data.gameCode).emit(EVENTS.playerAsked, { data: data.playerName });
 			callback({ status: 'OK', data: {} });
+			io.in(data.gameCode).emit(EVENTS.playerAnswered, { data: data.playerName });
 		} catch (error) {
 			callback({ status: '!OK', errors: error });
 		}
@@ -174,12 +173,7 @@ export class GameSocketController implements ISocketController {
 
 			callback({
 				status: 'OK',
-				data: {
-					question,
-					answers: [answers[0], answers[1]],
-					startTime,
-					duration: TIME_TO_VOTE,
-				},
+				data: {},
 			});
 			io.in(data.gameCode).emit(EVENTS.questionForVotiong, {
 				data: {

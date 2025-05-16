@@ -1,14 +1,29 @@
 import { Middleware } from "@reduxjs/toolkit";
 import { GameSocketAction } from "./actionTypes";
 import {
+  addAnsweredPlayer,
   addError,
   GameState,
+  nextQuestionForVoting,
+  setAvailableQuestionsForVoting,
   setGameCode,
   setPlayer,
+  setPlayerQuestions,
   setPlayers,
+  setQuestionForVoting,
+  setRoundId,
+  setTimer,
 } from "./gameSlice";
 import { socket } from "@/api/socket";
-import { InitGame, JoinGame, PlayerModel, SocketAnswer } from "@/types";
+import {
+  GameModel,
+  InitGame,
+  JoinGame,
+  PlayerModel,
+  QuestionForVoting,
+  SocketAnswer,
+  StartGame,
+} from "@/types";
 import { EVENTS } from "@/api/events";
 import { resolveAvatar } from "@/lib/utils";
 
@@ -26,7 +41,6 @@ export const gameSocketMiddleware =
         EVENTS.initGame,
         action.payload
       )) as SocketAnswer<InitGame>;
-      console.log(response, response.data!.game.gameCode);
 
       if (response.data) {
         const player = {
@@ -43,14 +57,14 @@ export const gameSocketMiddleware =
     }
 
     if (action.type == "game/joinGame") {
-      console.log(action.payload);
+      // console.log(action.payload);
       const response = (await socket.emitWithAck(
         EVENTS.joinGame,
         action.payload
       )) as SocketAnswer<JoinGame>;
 
       if (response.data) {
-        console.log(response, response.data.player.name);
+        // console.log(response, response.data.player.name);
         store.dispatch(setGameCode(action.payload.gameCode));
         store.dispatch(
           setPlayer({
@@ -69,22 +83,45 @@ export const gameSocketMiddleware =
       }
     }
 
-    socket.on(EVENTS.playerJoined, (data: SocketAnswer<PlayerModel[]>) => {
-      console.log(data);
-      if (data.data) {
-        console.log(data);
-        store.dispatch(
-          setPlayers(
-            data.data.map((p) => ({
-              playerName: p.name,
-              status: p.avatarNumber == 1 ? "VIP" : "normal",
-              avatarURL: resolveAvatar(p.avatarNumber),
-              score: p.score,
-            }))
-          )
-        );
+    if (action.type == "game/startGame") {
+      const response = (await socket.emitWithAck(EVENTS.startGame, {
+        gameCode: store.getState().game.gameCode,
+      })) as SocketAnswer<GameModel>;
+
+      if (response.errors) {
+        store.dispatch(addError(response.errors));
+      } else {
+        store.dispatch(addError(null));
       }
-    });
+    }
+
+    if (action.type == "game/sendAnswer") {
+      const response = (await socket.emitWithAck(
+        EVENTS.answerQuestion,
+        action.payload
+      )) as SocketAnswer<void>;
+      console.log(action.payload, response);
+      if (response.errors) {
+        store.dispatch(addError(response.errors));
+      } else {
+        store.dispatch(addError(null));
+      }
+    }
+
+    if (action.type == "game/questionForVoting") {
+      const response = (await socket.emitWithAck(
+        EVENTS.requestQuestionForVoting,
+        action.payload
+      )) as SocketAnswer<void>;
+
+      if (response.errors) {
+        store.dispatch(addError(response.errors));
+      } else {
+        store.dispatch(addError(null));
+      }
+
+      store.dispatch(nextQuestionForVoting());
+    }
 
     return next(action);
   };
@@ -94,4 +131,8 @@ const isGameSocketAction = (action: unknown): action is GameSocketAction =>
   action !== null &&
   "type" in action &&
   typeof action.type === "string" &&
-  (action.type == "game/initGame" || action.type == "game/joinGame");
+  (action.type == "game/initGame" ||
+    action.type == "game/joinGame" ||
+    action.type == "game/startGame" ||
+    action.type == "game/sendAnswer" ||
+    action.type == "game/questionForVoting");

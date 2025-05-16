@@ -18,5 +18,5 @@ export const resolveAvatar = (playerNumber: number): string => {
   };
 
   const avatarName = playerNumberToAvatar[playerNumber];
-  return `../../../public/${avatarName}.webp`;
+  return `../../../${avatarName}.webp`;
 };

@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class AnswerQuestionDTO {
 	@IsNotEmpty({ message: 'playerName is empty' })

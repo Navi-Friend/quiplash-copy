@@ -300,11 +300,14 @@ export class GameOrchestrator implements IGameOrhestrator {
 		questionId: number,
 		playerName: string,
 	): boolean {
-		const isAnswerDub = round.answers.some((a) => a.answer == answer);
-		const isQuestionIdDub = round.answers.some((a) => a.questionId == questionId);
-		const isPlayerNameDub = round.answers.some((a) => a.playerName == playerName);
+		const isAnswerDub = round.answers.some(
+			(a) =>
+				a.answer == answer &&
+				a.playerName == playerName &&
+				a.questionId == questionId,
+		);
 
-		return isAnswerDub && isPlayerNameDub && isQuestionIdDub;
+		return isAnswerDub;
 	}
 
 	private isDublicatedVote(votes: Vote[], v: Vote): boolean {
