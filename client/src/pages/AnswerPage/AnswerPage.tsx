@@ -12,40 +12,31 @@ export function AnswerPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const timerParams = gameState.timer
-    ? {
-        startTime: gameState.timer.startTime,
-        duration: gameState.timer.duration,
-      }
-    : null;
-
-  const [timerValue, clearTimer] = useTimer(
-    timerParams || {
-      startTime: 0,
-      duration: 0,
-    }
-  );
-  const remainingTime = gameState.timer ? timerValue : 0;
+  const [timerValue, clearTimer] = useTimer({
+    startTime: gameState.timer?.startTime || Date.now() + 1000,
+    duration: gameState.timer?.duration || 10000,
+  });
 
   useEffect(() => {
-    console.log(remainingTime);
     if (
-      ((gameState.answeredPlayers.length == gameState.players.length &&
+      (gameState.answeredPlayers.length == gameState.players.length &&
         gameState.answeredPlayers.every((p) => p.answers == 2)) ||
-        remainingTime === 1) &&
-      gameState.player?.status == "VIP" &&
-      gameState.currentQuestionForVotingIndex == 0
+      timerValue <= 0
     ) {
-      console.log("getQuestions");
-      dispatchGetQuestion();
       clearTimer();
+      if (
+        gameState.player?.status == "VIP" &&
+        gameState.currentQuestionForVotingIndex == 0
+      ) {
+        dispatchGetQuestion();
+      }
     }
 
-    if (gameState.currentQuestionForVoting) {
+    if (gameState.currentQuestionForVotingIndex) {
       console.log("navigate");
       // TODO navigate
     }
-  }, [gameState, remainingTime]);
+  }, [gameState, timerValue]);
 
   const dispatchGetQuestion = useCallback(() => {
     if (gameState.player?.status == "VIP") {
@@ -70,8 +61,9 @@ export function AnswerPage() {
   return (
     <>
       {gameState.timer && (
-        <Timer time={remainingTime} className="absolute top-13 left-30" />
+        <Timer time={timerValue} className="absolute top-13 left-30" />
       )}
+
       <QuestionBox />
       <div className="mt-10 mb-[-60px] flex justify-center items-baseline gap-4">
         {gameState.players.map((p, i) => (

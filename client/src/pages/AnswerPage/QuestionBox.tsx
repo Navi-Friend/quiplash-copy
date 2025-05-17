@@ -22,7 +22,7 @@ export function QuestionBox() {
   );
 
   const handleAnswer = () => {
-    console.log("handle Answer");
+    setIsFirstAnswered(true);
     dispatch<GameSocketAction>({
       type: "game/sendAnswer",
       payload: {
@@ -44,18 +44,16 @@ export function QuestionBox() {
   };
 
   useEffect(() => {
-    const a = gameState.answeredPlayers.find(
-      (p) => p.playerName == gameState.player?.playerName && p.answers >= 1
+    const hasAllAnswers = gameState.answeredPlayers.find(
+      (p) => p.playerName == gameState.player?.playerName && p.answers == 2
     );
     if (gameState.error && !toast.isActive("warnToast")) {
       toast.warn(gameState.error.message, {
         toastId: "warnToast",
       });
-    } else if (a) {
-      if (isFirstAnswered) {
-        setIsHidden(true);
-      }
-      setIsFirstAnswered(true);
+    }
+    if (hasAllAnswers || gameState.currentQuestionForVoting) {
+      setIsHidden(true);
     }
   }, [gameState]);
 

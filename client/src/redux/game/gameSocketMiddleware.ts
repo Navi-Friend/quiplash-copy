@@ -113,14 +113,14 @@ export const gameSocketMiddleware =
         EVENTS.requestQuestionForVoting,
         action.payload
       )) as SocketAnswer<void>;
-
+      
       if (response.errors) {
         store.dispatch(addError(response.errors));
       } else {
         store.dispatch(addError(null));
+        store.dispatch(nextQuestionForVoting());
       }
 
-      store.dispatch(nextQuestionForVoting());
     }
 
     return next(action);
