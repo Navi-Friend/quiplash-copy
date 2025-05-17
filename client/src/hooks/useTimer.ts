@@ -7,10 +7,22 @@ type TimerProps = {
   onEnd?: () => void;
 };
 
-export function useTimer({ startTime, duration, onTick, onEnd }: TimerProps) {
+type TimerReturnType = [number, () => void];
+
+export function useTimer({
+  startTime,
+  duration,
+  onTick,
+  onEnd,
+}: TimerProps): TimerReturnType {
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  function clearFn() {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }
 
   useEffect(() => {
     const timeDiff = startTime - Date.now();
@@ -44,11 +56,8 @@ export function useTimer({ startTime, duration, onTick, onEnd }: TimerProps) {
       startTimer(timeDiff);
     }
 
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    return clearFn;
   }, [startTime, duration]);
 
-  return Math.round(remainingTime / 1000);
+  return [Math.round(remainingTime / 1000), clearFn];
 }

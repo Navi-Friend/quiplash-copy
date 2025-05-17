@@ -15,7 +15,6 @@ export function PlayersLobby() {
 
   const handleStartGame = () => {
     dispatch<GameSocketAction>({ type: "game/startGame" });
-    // navigate(routes.answerPage);
   };
 
   useEffect(() => {

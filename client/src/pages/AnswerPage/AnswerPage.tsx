@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { useTimer } from "@/hooks/useTimer";
 import { QuestionBox } from "./QuestionBox";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { GameSocketAction } from "@/redux/game/actionTypes";
 import { useNavigate } from "react-router-dom";
 
@@ -19,35 +19,35 @@ export function AnswerPage() {
       }
     : null;
 
-  const timerValue = useTimer(
+  const [timerValue, clearTimer] = useTimer(
     timerParams || {
       startTime: 0,
       duration: 0,
-      onTick: () => {},
-      onEnd: dispatchGetQuestion,
     }
   );
-
   const remainingTime = gameState.timer ? timerValue : 0;
 
   useEffect(() => {
+    console.log(remainingTime);
     if (
-      gameState.answeredPlayers.length == gameState.players.length &&
-      gameState.answeredPlayers.every((p) => p.answers == 2) &&
+      ((gameState.answeredPlayers.length == gameState.players.length &&
+        gameState.answeredPlayers.every((p) => p.answers == 2)) ||
+        remainingTime === 1) &&
       gameState.player?.status == "VIP" &&
-      !gameState.currentQuestionForVoting
+      gameState.currentQuestionForVotingIndex == 0
     ) {
       console.log("getQuestions");
       dispatchGetQuestion();
+      clearTimer();
     }
 
     if (gameState.currentQuestionForVoting) {
       console.log("navigate");
       // TODO navigate
     }
-  }, [gameState]);
+  }, [gameState, remainingTime]);
 
-  function dispatchGetQuestion() {
+  const dispatchGetQuestion = useCallback(() => {
     if (gameState.player?.status == "VIP") {
       dispatch<GameSocketAction>({
         type: "game/questionForVoting",
@@ -65,7 +65,7 @@ export function AnswerPage() {
         },
       });
     }
-  }
+  }, []);
 
   return (
     <>
