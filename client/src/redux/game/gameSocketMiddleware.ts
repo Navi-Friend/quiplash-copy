@@ -23,6 +23,7 @@ import {
   QuestionForVoting,
   SocketAnswer,
   StartGame,
+  VoteModel,
 } from "@/types";
 import { EVENTS } from "@/api/events";
 import { resolveAvatar } from "@/lib/utils";
@@ -113,14 +114,26 @@ export const gameSocketMiddleware =
         EVENTS.requestQuestionForVoting,
         action.payload
       )) as SocketAnswer<void>;
-      
+
       if (response.errors) {
         store.dispatch(addError(response.errors));
       } else {
         store.dispatch(addError(null));
         store.dispatch(nextQuestionForVoting());
       }
+    }
 
+    if (action.type == "game/voteForAnswer") {
+      const response = (await socket.emitWithAck(
+        EVENTS.voteForAnswer,
+        action.payload
+      )) as SocketAnswer<VoteModel[]>;
+
+      if (response.errors) {
+        store.dispatch(addError(response.errors));
+      } else {
+        store.dispatch(addError(null));
+      }
     }
 
     return next(action);
@@ -135,4 +148,5 @@ const isGameSocketAction = (action: unknown): action is GameSocketAction =>
     action.type == "game/joinGame" ||
     action.type == "game/startGame" ||
     action.type == "game/sendAnswer" ||
-    action.type == "game/questionForVoting");
+    action.type == "game/questionForVoting" ||
+    action.type == "game/voteForAnswer");

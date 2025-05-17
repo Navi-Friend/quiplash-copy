@@ -91,3 +91,9 @@ export interface QuestionForVoting {
   startTime: number;
   duration: number;
 }
+
+export interface VoteModel {
+	voteId: string;
+	answerId: string;
+	playerName: string;
+}

@@ -5,6 +5,7 @@ import {
   QuestionForVoting,
   SocketAnswer,
   StartGame,
+  VoteModel,
 } from "@/types";
 import { resolveAvatar } from "@/lib/utils";
 import {
@@ -71,7 +72,24 @@ socket.on(
   (data: SocketAnswer<QuestionForVoting>) => {
     if (data.data) {
       console.log(data);
-      store.dispatch(setQuestionForVoting(data.data.question));
+      store.dispatch(
+        setQuestionForVoting({
+          question: data.data.question,
+          answers: data.data.answers,
+        })
+      );
+      store.dispatch(
+        setTimer({
+          duration: data.data.duration,
+          startTime: data.data.startTime,
+        })
+      );
     }
   }
 );
+
+socket.on(EVENTS.sendVotes, (data: SocketAnswer<VoteModel[]>) => {
+  if (data.data) {
+    console.log(data.data);
+  }
+});

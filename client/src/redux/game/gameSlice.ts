@@ -3,6 +3,7 @@ import {
   PlayerQuestions,
   QuestionModel,
   SocketAnswerError,
+  AnswerModel,
 } from "@/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -22,6 +23,7 @@ export interface GameState {
   answeredPlayers: { playerName: string; answers: number }[];
   roundId: string;
   currentQuestionForVoting: QuestionModel | null;
+  currentAnswersForVoting: [AnswerModel, AnswerModel] | null;
   currentQuestionForVotingIndex: number;
   availableQuestionsForVoting: number[];
 }
@@ -37,6 +39,7 @@ const initialState: GameState = {
   answeredPlayers: [],
   roundId: "",
   currentQuestionForVoting: null,
+  currentAnswersForVoting: null,
   currentQuestionForVotingIndex: 0,
   availableQuestionsForVoting: [],
 };
@@ -100,8 +103,15 @@ const gameSlice = createSlice({
     ) => {
       state.availableQuestionsForVoting = action.payload;
     },
-    setQuestionForVoting: (state, action: PayloadAction<QuestionModel>) => {
-      state.currentQuestionForVoting = action.payload;
+    setQuestionForVoting: (
+      state,
+      action: PayloadAction<{
+        question: QuestionModel;
+        answers: [AnswerModel, AnswerModel];
+      }>
+    ) => {
+      state.currentQuestionForVoting = action.payload.question;
+      state.currentAnswersForVoting = action.payload.answers;
     },
     nextQuestionForVoting: (state) => {
       state.currentQuestionForVotingIndex += 1;
