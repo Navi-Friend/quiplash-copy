@@ -51,8 +51,8 @@ export function AnswerOption({
             {
               "shadow-[-8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[-12px_12px_0px_0px_rgba(0,0,0,1)]":
                 position === "left",
-              "bg-gray-100 scale-95": isSelected,
-              "opacity-50 cursor-not-allowed hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]":
+              "bg-gray-300 scale-95": isSelected,
+              "opacity-70 cursor-not-allowed bg-gray-500 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]":
                 disabled,
               "hover:shadow-[-8px_8px_0px_0px_rgba(0,0,0,1)]":
                 disabled && position === "left",

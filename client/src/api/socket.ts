@@ -72,8 +72,8 @@ socket.on(EVENTS.playerAnswered, (data: SocketAnswer<string>) => {
 socket.on(
   EVENTS.questionForVotiong,
   (data: SocketAnswer<QuestionForVoting>) => {
+    console.log(data.data);
     if (data.data) {
-      store.dispatch(nextQuestionForVoting());
 
       store.dispatch(
         setQuestionForVoting({
@@ -87,6 +87,7 @@ socket.on(
           startTime: data.data.startTime,
         })
       );
+      store.dispatch(nextQuestionForVoting());
     }
   }
 );
@@ -95,6 +96,7 @@ socket.on(
   EVENTS.pointsCalculated,
   (data: SocketAnswer<VotingResultsAnswer>) => {
     if (data.data) {
+      console.log(data.data);
       const player1 = store
         .getState()
         .game.players.find((p) => p.playerName == data.data!.player1.name);

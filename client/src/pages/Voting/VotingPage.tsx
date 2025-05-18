@@ -15,6 +15,7 @@ import { routes } from "@/lib/routes";
 import { PlayerState } from "@/redux/game/gameSlice";
 import { socket } from "@/api/socket";
 import { EVENTS } from "@/api/events";
+import store from "@/redux/store";
 
 export enum Stages {
   SHOW_QUESTION,
@@ -84,28 +85,35 @@ export function VotingPage() {
     if (stage === Stages.RESULTS) {
       setPlayer1Score(player1.score || 0);
       setPlayer2Score(player2.score || 0);
-
+      console.log("1");
       if (!hasRequestedNextQuestion.current) {
         hasRequestedNextQuestion.current = true;
+        console.log("2");
 
         setTimeout(() => {
           if (
-            gameState.currentQuestionForVotingIndex ==
+            gameState.currentQuestionForVotingIndex <=
             gameState.availableQuestionsForVoting.length - 1
           ) {
+            console.log("3");
+
+            if (gameState.player?.status === "VIP") {
+              console.log("4");
+
+              dispatch<GameSocketAction>({
+                type: "game/questionForVoting",
+                payload: {
+                  questionId:
+                    gameState.availableQuestionsForVoting[
+                      gameState.currentQuestionForVotingIndex
+                    ],
+                  roundId: gameState.roundId,
+                  gameCode: gameState.gameCode,
+                },
+              });
+            }
+          } else {
             navigate(routes.leaderboard);
-          } else if (gameState.player?.status === "VIP") {
-            dispatch<GameSocketAction>({
-              type: "game/questionForVoting",
-              payload: {
-                questionId:
-                  gameState.availableQuestionsForVoting[
-                    gameState.currentQuestionForVotingIndex + 1
-                  ],
-                roundId: gameState.roundId,
-                gameCode: gameState.gameCode,
-              },
-            });
           }
         }, 3000);
       }
@@ -122,6 +130,7 @@ export function VotingPage() {
       forceReload();
     };
 
+    console.log("handleNewQuestion");
     socket.on(EVENTS.questionForVotiong, handleNewQuestion);
     return () => {
       socket.off(EVENTS.questionForVotiong, handleNewQuestion);
@@ -170,18 +179,30 @@ export function VotingPage() {
   );
 
   const handleTimeExpired = useCallback(() => {
+    const currentAnswers = gameState.currentAnswersForVoting;
+
+    console.log("handleTimeExpired debug:", {
+      isVip: gameState.player?.status === "VIP",
+      currentIndex: gameState.currentQuestionForVotingIndex,
+      totalQuestions: gameState.availableQuestionsForVoting.length,
+      hasAnswers: !!currentAnswers,
+      answers: currentAnswers,
+    });
+
     if (
-      gameState.player?.status == "VIP" &&
-      gameState.currentQuestionForVotingIndex <
-        gameState.availableQuestionsForVoting.length - 1
+      gameState.player?.status === "VIP" &&
+      gameState.currentQuestionForVotingIndex <=
+        gameState.availableQuestionsForVoting.length &&
+      currentAnswers
     ) {
+      console.log("timer dispatch voting results", currentAnswers);
       dispatch<GameSocketAction>({
         type: "game/votingResults",
         payload: {
           roundId: gameState.roundId,
           gameCode: gameState.gameCode,
-          answerId1: gameState.currentAnswersForVoting?.[0].answerId,
-          answerId2: gameState.currentAnswersForVoting?.[1].answerId,
+          answerId1: currentAnswers[0].answerId,
+          answerId2: currentAnswers[1].answerId,
         } as {
           roundId: string;
           gameCode: string;
@@ -192,7 +213,7 @@ export function VotingPage() {
     }
     setStage(Stages.RESULTS);
     setIsTimeExpired(true);
-  }, []);
+  }, [dispatch, gameState.currentAnswersForVoting?.[0].answerId]);
 
   return (
     <div
