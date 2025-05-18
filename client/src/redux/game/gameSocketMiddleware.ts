@@ -14,7 +14,7 @@ import {
   InitGame,
   JoinGame,
   SocketAnswer,
-  VoteModel,
+  VotingResultsAnswer,
 } from "@/types";
 import { EVENTS } from "@/api/events";
 import { resolveAvatar } from "@/lib/utils";
@@ -118,9 +118,23 @@ export const gameSocketMiddleware =
       const response = (await socket.emitWithAck(
         EVENTS.voteForAnswer,
         action.payload
-      )) as SocketAnswer<VoteModel[]>;
+      )) as SocketAnswer<void>;
 
       if (response.errors) {
+        store.dispatch(addError(response.errors));
+      } else {
+        store.dispatch(addError(null));
+      }
+    }
+
+    if (action.type == "game/votingResults") {
+      const response = (await socket.emitWithAck(
+        EVENTS.calcVotes,
+        action.payload
+      )) as SocketAnswer<VotingResultsAnswer>;
+
+      if (response.errors) {
+        console.log(response.errors);
         store.dispatch(addError(response.errors));
       } else {
         store.dispatch(addError(null));
@@ -140,4 +154,5 @@ const isGameSocketAction = (action: unknown): action is GameSocketAction =>
     action.type == "game/startGame" ||
     action.type == "game/sendAnswer" ||
     action.type == "game/questionForVoting" ||
-    action.type == "game/voteForAnswer");
+    action.type == "game/voteForAnswer" ||
+    action.type == "game/votingResults");

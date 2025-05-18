@@ -4,7 +4,6 @@ import { VoteModel } from './vote.model';
 
 export interface RoundModel {
 	roundId: string;
-	// players: PlayerModel[];
 	questions: QuestionModel[];
 	answers: AnswerModel[];
 	votes: VoteModel[];

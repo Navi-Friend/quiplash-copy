@@ -8,9 +8,9 @@ export class CalcAnswerPointsDTO {
 	@IsString({ message: 'gameCode is not string' })
 	gameCode!: string;
 
-	@IsString({ message: 'answerId is not string' })
+	@IsString({ message: 'answerId1 is not string' })
 	answerId1!: string;
 
-	@IsString({ message: 'answerId is not string' })
+	@IsString({ message: 'answerId2 is not string' })
 	answerId2!: string;
 }

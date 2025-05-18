@@ -213,9 +213,9 @@ export class GameOrchestrator implements IGameOrhestrator {
 			answerId,
 		);
 
-		if (playerName == answer?.playerName) {
-			throw new AppError('You can not vote for your answer');
-		}
+		// if (playerName == answer?.playerName) {
+		// 	throw new AppError('You can not vote for your answer');
+		// }
 
 		round.votes.push(vote);
 

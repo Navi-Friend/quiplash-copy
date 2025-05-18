@@ -9,6 +9,7 @@ import { OrButton } from "./OrButton";
 import { cn } from "@/lib/utils";
 import { VotingTimer } from "./VotingTimer";
 import { AnswerModel } from "@/types";
+import { Avatar } from "@/components/common";
 
 export enum Stages {
   SHOW_QUESTION,
@@ -28,6 +29,21 @@ export function VotingPage() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [isTimeExpired, setIsTimeExpired] = useState(false);
+  const [player1Score, setPlayer1Score] = useState<number>(0);
+  const [player2Score, setPlayer2Score] = useState<number>(0);
+
+  const showAnswers = stage !== Stages.SHOW_QUESTION;
+  const currentQuestion = gameState.currentQuestionForVoting;
+  const currentAnswers = gameState.currentAnswersForVoting as [
+    AnswerModel,
+    AnswerModel
+  ];
+  const player1 = gameState.players.find(
+    (p) => p.playerName == gameState.currentAnswersForVoting?.[0].playerName
+  );
+  const player2 = gameState.players.find(
+    (p) => p.playerName == gameState.currentAnswersForVoting?.[1].playerName
+  );
 
   useEffect(() => {
     if (stage === Stages.SHOW_QUESTION) {
@@ -39,12 +55,34 @@ export function VotingPage() {
     }
   }, [stage]);
 
-  const showAnswers = stage !== Stages.SHOW_QUESTION;
-  const currentQuestion = gameState.currentQuestionForVoting;
-  const currentAnswers = gameState.currentAnswersForVoting as [
-    AnswerModel,
-    AnswerModel
-  ];
+  useEffect(() => {
+    if (stage === Stages.RESULTS) {
+      // Get scores from players array
+      const player1Score = player1?.score || 0;
+      const player2Score = player2?.score || 0;
+
+      // Animate score counting
+      const duration = 1000; // 1 second
+      const steps = 20;
+      const stepDuration = duration / steps;
+
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        const progress = currentStep / steps;
+        setPlayer1Score(Math.floor(player1Score * progress));
+        setPlayer2Score(Math.floor(player2Score * progress));
+
+        currentStep++;
+        if (currentStep > steps) {
+          clearInterval(interval);
+          setPlayer1Score(player1Score);
+          setPlayer2Score(player2Score);
+        }
+      }, stepDuration);
+
+      return () => clearInterval(interval);
+    }
+  }, [stage, player1?.score, player2?.score]);
 
   const handleSubmit = useCallback(() => {
     if (
@@ -89,6 +127,7 @@ export function VotingPage() {
   );
 
   const handleTimeExpired = useCallback(() => {
+    setStage(Stages.RESULTS);
     setIsTimeExpired(true);
   }, []);
 
@@ -103,28 +142,52 @@ export function VotingPage() {
       <div className="w-full flex items-center justify-center gap-7 mt-5">
         {currentAnswers && (
           <>
-            <MemoizedAnswerOption
-              text={currentAnswers[0].answer}
-              isVisible={showAnswers}
-              position="left"
-              isSelected={selectedAnswer === 0}
-              onSelect={() => handleSelect(0)}
-              disabled={isTimeExpired}
-            />
+            <div className="relative">
+              <MemoizedAnswerOption
+                text={currentAnswers[0].answer}
+                isVisible={showAnswers}
+                position="left"
+                isSelected={selectedAnswer === 0}
+                onSelect={() => handleSelect(0)}
+                disabled={isTimeExpired}
+              />
+              {stage === Stages.RESULTS && player1 && (
+                <Avatar
+                  avatarURL={player1.avatarURL}
+                  isVip={player1.status === "VIP"}
+                  name={player1.playerName}
+                  className="absolute -bottom-[75%] -left-[5%]"
+                  score={player1Score}
+                  showScore={true}
+                />
+              )}
+            </div>
             <MemoizedOrButton isVisible={showAnswers} />
-            <MemoizedAnswerOption
-              text={currentAnswers[1].answer}
-              isVisible={showAnswers}
-              position="right"
-              isSelected={selectedAnswer === 1}
-              onSelect={() => handleSelect(1)}
-              disabled={isTimeExpired}
-            />
+            <div className="relative">
+              <MemoizedAnswerOption
+                text={currentAnswers[1].answer}
+                isVisible={showAnswers}
+                position="right"
+                isSelected={selectedAnswer === 1}
+                onSelect={() => handleSelect(1)}
+                disabled={isTimeExpired}
+              />
+              {stage === Stages.RESULTS && player2 && (
+                <Avatar
+                  avatarURL={player2.avatarURL}
+                  isVip={player2.status === "VIP"}
+                  name={player2.playerName}
+                  className="absolute -bottom-[75%] -right-[5%]"
+                  score={player2Score}
+                  showScore={true}
+                />
+              )}
+            </div>
           </>
         )}
       </div>
 
-      {showAnswers && selectedAnswer !== null && (
+      {!isTimeExpired && selectedAnswer !== null && (
         <motion.div
           className="absolute bottom-[7%]"
           initial={{ opacity: 0, y: 20 }}

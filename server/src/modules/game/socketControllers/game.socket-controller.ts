@@ -201,6 +201,7 @@ export class GameSocketController implements ISocketController {
 			return;
 		}
 		try {
+			this.logger.warn('vote ' + data.playerName);
 			const votes = await this.mainService.voteForAnswer(data);
 
 			callback({
@@ -233,14 +234,10 @@ export class GameSocketController implements ISocketController {
 
 			callback({
 				status: 'OK',
-				data: points,
-				player1,
-				player2,
+				data: { points, player1, player2 },
 			});
 			io.in(data.gameCode).emit(EVENTS.pointsCalculated, {
-				data: points,
-				player1,
-				player2,
+				data: { points, player1, player2 },
 			});
 		} catch (error) {
 			callback({ status: '!OK', errors: error });

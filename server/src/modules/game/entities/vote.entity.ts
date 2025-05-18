@@ -6,7 +6,7 @@ export class Vote {
 		private _playerName: string,
 		private _answerId: string,
 	) {}
-	
+
 	static createNew(playerName: string, answerId: string): Vote {
 		return new Vote(v4(), playerName, answerId);
 	}

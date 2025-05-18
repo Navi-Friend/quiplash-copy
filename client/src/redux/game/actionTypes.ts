@@ -42,4 +42,13 @@ export type GameSocketAction =
         roundId: string;
         playerName: string;
       };
+    }
+  | {
+      type: "game/votingResults";
+      payload: {
+        roundId: string;
+        gameCode: string;
+        answerId1: string;
+        answerId2: string;
+      };
     };

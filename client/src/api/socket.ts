@@ -6,6 +6,7 @@ import {
   SocketAnswer,
   StartGame,
   VoteModel,
+  VotingResultsAnswer,
 } from "@/types";
 import { resolveAvatar } from "@/lib/utils";
 import {
@@ -16,6 +17,7 @@ import {
   setQuestionForVoting,
   setRoundId,
   setTimer,
+  updatePlayers,
 } from "@/redux/game/gameSlice";
 import store from "@/redux/store";
 
@@ -93,3 +95,34 @@ socket.on(EVENTS.sendVotes, (data: SocketAnswer<VoteModel[]>) => {
     console.log(data.data);
   }
 });
+
+socket.on(
+  EVENTS.pointsCalculated,
+  (data: SocketAnswer<VotingResultsAnswer>) => {
+    if (data.data) {
+      const player1 = store
+        .getState()
+        .game.players.find((p) => p.playerName == data.data!.player1.name);
+      const player2 = store
+        .getState()
+        .game.players.find((p) => p.playerName == data.data!.player2.name);
+      store.dispatch(
+        updatePlayers({
+          playerName: player1!.playerName,
+          avatarURL: player1!.avatarURL,
+          status: player1!.status,
+          score: data.data.player1.score,
+        })
+      );
+
+      store.dispatch(
+        updatePlayers({
+          playerName: player2!.playerName,
+          avatarURL: player2!.avatarURL,
+          status: player2!.status,
+          score: data.data.player2.score,
+        })
+      );
+    }
+  }
+);

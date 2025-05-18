@@ -51,6 +51,14 @@ const gameSlice = createSlice({
     setPlayers: (state, action: PayloadAction<PlayerState[]>) => {
       state.players = action.payload;
     },
+    updatePlayers: (state, action: PayloadAction<PlayerState>) => {
+      const player = state.players.find(
+        (p) => p.playerName == action.payload.playerName
+      );
+
+      const index = state.players.indexOf(player!);
+      state.players.splice(index, 1, action.payload);
+    },
     setPlayer: (state, action: PayloadAction<PlayerState>) => {
       state.player = action.payload;
     },
@@ -122,6 +130,7 @@ const gameSlice = createSlice({
 
 export const {
   setPlayers,
+  updatePlayers,
   setPlayer,
   addError,
   setGameCode,

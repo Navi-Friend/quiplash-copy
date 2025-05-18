@@ -93,7 +93,19 @@ export interface QuestionForVoting {
 }
 
 export interface VoteModel {
-	voteId: string;
-	answerId: string;
-	playerName: string;
+  voteId: string;
+  answerId: string;
+  playerName: string;
+}
+
+export interface VotingResult {
+  answer1: { answerId: string; points: number };
+  answer2: { answerId: string; points: number };
+  extra: "mess" | "quiplash" | null;
+}
+
+export interface VotingResultsAnswer {
+  points: VotingResult;
+  player1: PlayerModel;
+  player2: PlayerModel;
 }
