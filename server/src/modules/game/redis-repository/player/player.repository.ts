@@ -61,6 +61,22 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 		}
 	}
 
+	async updateVIPScore(gameCode: string, newScore: number): Promise<PlayerModel> {
+		try {
+			await this.redisService.redis.hSet(`game:${gameCode}:vip`, 'score', newScore);
+
+			this.logger.debug(
+				`VIP score is updated in redis: ${JSON.stringify(newScore)}`,
+				this,
+			);
+
+			return (await this.getVIPPlayer(gameCode)) as PlayerModel;
+		} catch (error) {
+			this.logger.error('VIP score is not updated in redis', this);
+			throw new AppError('Error while update VIP score', error as Error);
+		}
+	}
+
 	async setPlayer(gameCode: string, player: Player): Promise<PlayerModel> {
 		try {
 			const playerModel: PlayerModel = {
@@ -85,6 +101,30 @@ export class PlayerRepository extends BaseRedisRepository implements IPlayerRepo
 		} catch (error) {
 			this.logger.error(`Player is not set to redis: ${error}`, this);
 			throw new AppError('Error while set player', error as Error);
+		}
+	}
+
+	async updatePlayerScore(
+		gameCode: string,
+		playerName: string,
+		newScore: number,
+	): Promise<PlayerModel> {
+		try {
+			const response = await this.redisService.redis.json.set(
+				`game:${gameCode}:players`,
+				`$.[?(@name == "${playerName}")].score`,
+				newScore,
+			);
+
+			this.logger.debug(
+				`Player score was updated in redis: ${JSON.stringify(response)}`,
+				this,
+			);
+
+			return (await this.getPlayer(gameCode, playerName)) as PlayerModel;
+		} catch (error) {
+			this.logger.error(`Player score was not updated in redis: ${error}`, this);
+			throw new AppError("Error while update player's score", error as Error);
 		}
 	}
 

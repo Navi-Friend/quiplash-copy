@@ -5,12 +5,12 @@ import {
   QuestionForVoting,
   SocketAnswer,
   StartGame,
-  VoteModel,
   VotingResultsAnswer,
 } from "@/types";
 import { resolveAvatar } from "@/lib/utils";
 import {
   addAnsweredPlayer,
+  nextQuestionForVoting,
   setAvailableQuestionsForVoting,
   setPlayerQuestions,
   setPlayers,
@@ -54,17 +54,17 @@ socket.on(EVENTS.gameStarted, (data: SocketAnswer<StartGame>) => {
     );
     store.dispatch(setRoundId(data.data.roundId));
 
-    const IDs = data.data.questoins.flatMap((q) => [
+    const ids = data.data.questoins.flatMap((q) => [
       q.question1.questionId,
       q.question2.questionId,
     ]);
-    store.dispatch(setAvailableQuestionsForVoting(IDs));
+    const uniqueIds = [...new Set(ids)];
+    store.dispatch(setAvailableQuestionsForVoting(uniqueIds));
   }
 });
 
 socket.on(EVENTS.playerAnswered, (data: SocketAnswer<string>) => {
   if (data.data) {
-    console.log(data);
     store.dispatch(addAnsweredPlayer(data.data));
   }
 });
@@ -73,7 +73,8 @@ socket.on(
   EVENTS.questionForVotiong,
   (data: SocketAnswer<QuestionForVoting>) => {
     if (data.data) {
-      console.log(data);
+      store.dispatch(nextQuestionForVoting());
+
       store.dispatch(
         setQuestionForVoting({
           question: data.data.question,
@@ -90,12 +91,6 @@ socket.on(
   }
 );
 
-socket.on(EVENTS.sendVotes, (data: SocketAnswer<VoteModel[]>) => {
-  if (data.data) {
-    console.log(data.data);
-  }
-});
-
 socket.on(
   EVENTS.pointsCalculated,
   (data: SocketAnswer<VotingResultsAnswer>) => {
@@ -106,6 +101,7 @@ socket.on(
       const player2 = store
         .getState()
         .game.players.find((p) => p.playerName == data.data!.player2.name);
+
       store.dispatch(
         updatePlayers({
           playerName: player1!.playerName,

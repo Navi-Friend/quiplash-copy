@@ -10,6 +10,7 @@ import {
   Rules,
   VotingPage,
   AnswerPage,
+  Leaderboard,
 } from "./pages/index.ts";
 import { Wrapper } from "./components/layout/Wrapper.tsx";
 import { Provider } from "react-redux";
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: routes.vote,
         element: <VotingPage />,
+      },
+      {
+        path: routes.leaderboard,
+        element: <Leaderboard />,
       },
     ],
   },

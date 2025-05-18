@@ -44,8 +44,16 @@ export class Round {
 		votes2: number,
 		roundNumber: number,
 	): VotingResult {
-		const answer1Text = answer1.answer.trim().toLowerCase();
-		const answer2Text = answer2.answer.trim().toLowerCase();
+		if (votes1 == votes2) {
+			return {
+				answer1: { answerId: answer1.answerId, points: 500 * roundNumber },
+				answer2: { answerId: answer2.answerId, points: 500 * roundNumber },
+				extra: null,
+			};
+		}
+
+		const answer1Text = answer1.answer;
+		const answer2Text = answer2.answer;
 
 		if (answer1Text === answer2Text) {
 			return {

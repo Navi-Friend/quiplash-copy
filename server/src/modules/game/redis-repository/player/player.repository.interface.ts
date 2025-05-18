@@ -9,4 +9,10 @@ export interface IPlayerRepository {
 	setPlayer(gameCode: string, player: Player): Promise<PlayerModel>;
 	getPlayer(gameCode: string, name: string): Promise<PlayerModel | null>;
 	getPlayers(gameCode: string): Promise<PlayerModel[] | null>;
+	updatePlayerScore(
+		gameCode: string,
+		playerName: string,
+		newScore: number,
+	): Promise<PlayerModel>;
+	updateVIPScore(gameCode: string, newScore: number): Promise<PlayerModel>;
 }

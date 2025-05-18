@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo, useRef } from "react";
 import { Question } from "./Question";
 import { AnswerOption } from "./AnswerOption";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,11 @@ import { cn } from "@/lib/utils";
 import { VotingTimer } from "./VotingTimer";
 import { AnswerModel } from "@/types";
 import { Avatar } from "@/components/common";
+import { useNavigate } from "react-router-dom";
+import { routes } from "@/lib/routes";
+import { PlayerState } from "@/redux/game/gameSlice";
+import { socket } from "@/api/socket";
+import { EVENTS } from "@/api/events";
 
 export enum Stages {
   SHOW_QUESTION,
@@ -22,8 +27,15 @@ const MemoizedAnswerOption = memo(AnswerOption);
 const MemoizedOrButton = memo(OrButton);
 
 export function VotingPage() {
+  const [reloadKey, setReloadKey] = useState(0);
   const gameState = useAppSelector((state) => state.game);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const hasRequestedNextQuestion = useRef(false);
+
+  const forceReload = () => {
+    setReloadKey((prev) => prev + 1);
+  };
 
   const [stage, setStage] = useState<Stages>(Stages.SHOW_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -40,49 +52,81 @@ export function VotingPage() {
   ];
   const player1 = gameState.players.find(
     (p) => p.playerName == gameState.currentAnswersForVoting?.[0].playerName
-  );
+  ) as PlayerState;
   const player2 = gameState.players.find(
     (p) => p.playerName == gameState.currentAnswersForVoting?.[1].playerName
-  );
+  ) as PlayerState;
 
   useEffect(() => {
     if (stage === Stages.SHOW_QUESTION) {
       const timer = setTimeout(() => {
-        setStage(Stages.VOTING);
+        const hasEmptyAnswer = gameState.currentAnswersForVoting?.some(
+          (answer) => !answer.answer.trim()
+        );
+
+        if (
+          hasEmptyAnswer ||
+          gameState.currentAnswersForVoting?.[0].answer ==
+            gameState.currentAnswersForVoting?.[1].answer
+        ) {
+          setStage(Stages.RESULTS);
+          setIsTimeExpired(true);
+        } else {
+          setStage(Stages.VOTING);
+        }
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [stage]);
+  }, [stage, gameState.currentAnswersForVoting]);
 
   useEffect(() => {
     if (stage === Stages.RESULTS) {
-      // Get scores from players array
-      const player1Score = player1?.score || 0;
-      const player2Score = player2?.score || 0;
+      setPlayer1Score(player1.score || 0);
+      setPlayer2Score(player2.score || 0);
 
-      // Animate score counting
-      const duration = 1000; // 1 second
-      const steps = 20;
-      const stepDuration = duration / steps;
+      if (!hasRequestedNextQuestion.current) {
+        hasRequestedNextQuestion.current = true;
 
-      let currentStep = 0;
-      const interval = setInterval(() => {
-        const progress = currentStep / steps;
-        setPlayer1Score(Math.floor(player1Score * progress));
-        setPlayer2Score(Math.floor(player2Score * progress));
-
-        currentStep++;
-        if (currentStep > steps) {
-          clearInterval(interval);
-          setPlayer1Score(player1Score);
-          setPlayer2Score(player2Score);
-        }
-      }, stepDuration);
-
-      return () => clearInterval(interval);
+        setTimeout(() => {
+          if (
+            gameState.currentQuestionForVotingIndex ==
+            gameState.availableQuestionsForVoting.length - 1
+          ) {
+            navigate(routes.leaderboard);
+          } else if (gameState.player?.status === "VIP") {
+            dispatch<GameSocketAction>({
+              type: "game/questionForVoting",
+              payload: {
+                questionId:
+                  gameState.availableQuestionsForVoting[
+                    gameState.currentQuestionForVotingIndex + 1
+                  ],
+                roundId: gameState.roundId,
+                gameCode: gameState.gameCode,
+              },
+            });
+          }
+        }, 3000);
+      }
     }
-  }, [stage, player1?.score, player2?.score]);
+  }, [stage, gameState, dispatch, navigate]);
+
+  useEffect(() => {
+    const handleNewQuestion = () => {
+      setStage(Stages.SHOW_QUESTION);
+      setSelectedAnswer(null);
+      setHasVoted(false);
+      setIsTimeExpired(false);
+      hasRequestedNextQuestion.current = false;
+      forceReload();
+    };
+
+    socket.on(EVENTS.questionForVotiong, handleNewQuestion);
+    return () => {
+      socket.off(EVENTS.questionForVotiong, handleNewQuestion);
+    };
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (
@@ -91,7 +135,6 @@ export function VotingPage() {
       !hasVoted &&
       !isTimeExpired
     ) {
-      console.log("voting");
       dispatch<GameSocketAction>({
         type: "game/voteForAnswer",
         payload: {
@@ -127,12 +170,35 @@ export function VotingPage() {
   );
 
   const handleTimeExpired = useCallback(() => {
+    if (
+      gameState.player?.status == "VIP" &&
+      gameState.currentQuestionForVotingIndex <
+        gameState.availableQuestionsForVoting.length - 1
+    ) {
+      dispatch<GameSocketAction>({
+        type: "game/votingResults",
+        payload: {
+          roundId: gameState.roundId,
+          gameCode: gameState.gameCode,
+          answerId1: gameState.currentAnswersForVoting?.[0].answerId,
+          answerId2: gameState.currentAnswersForVoting?.[1].answerId,
+        } as {
+          roundId: string;
+          gameCode: string;
+          answerId1: string;
+          answerId2: string;
+        },
+      });
+    }
     setStage(Stages.RESULTS);
     setIsTimeExpired(true);
   }, []);
 
   return (
-    <div className="w-full min-h-[95vh] flex items-center justify-center flex-col relative">
+    <div
+      key={reloadKey}
+      className="w-full min-h-[95vh] flex items-center justify-center flex-col relative"
+    >
       {showAnswers && <VotingTimer onTimeExpired={handleTimeExpired} />}
       <MemoizedQuestion
         stage={stage}
@@ -177,7 +243,7 @@ export function VotingPage() {
                   avatarURL={player2.avatarURL}
                   isVip={player2.status === "VIP"}
                   name={player2.playerName}
-                  className="absolute -bottom-[75%] -right-[5%]"
+                  className="absolute -bottom-[70%] -right-[5%]"
                   score={player2Score}
                   showScore={true}
                 />

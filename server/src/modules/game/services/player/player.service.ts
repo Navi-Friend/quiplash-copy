@@ -52,12 +52,12 @@ export class PlayerService implements IPlayerService {
 		playerName: string,
 		scoreAdding: number,
 	): Promise<PlayerModel> {
-		console.log(playerName);
 		const vipModel = await this.playerRepository.getVIPPlayer(gameCode);
 		if (vipModel && vipModel?.name == playerName) {
 			const vip = VIPPlayer.restore(vipModel);
-			vip.score += scoreAdding;
-			return await this.playerRepository.setVIPPlayer(gameCode, vip);
+			const newScore = vip.score + scoreAdding;
+			vip.score = newScore;
+			return await this.playerRepository.updateVIPScore(gameCode, newScore);
 		} else {
 			const playerModel = await this.playerRepository.getPlayer(
 				gameCode,
@@ -67,8 +67,13 @@ export class PlayerService implements IPlayerService {
 				throw new AppError(`Can not find user with name ${playerName}`);
 			}
 			const player = Player.restore(playerModel);
-			player.score += scoreAdding;
-			return await this.playerRepository.setPlayer(gameCode, player);
+			const newScore = player.score + scoreAdding;
+			player.score = newScore;
+			return await this.playerRepository.updatePlayerScore(
+				gameCode,
+				player.name,
+				newScore,
+			);
 		}
 	}
 }

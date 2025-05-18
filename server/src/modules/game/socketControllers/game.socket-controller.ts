@@ -231,7 +231,7 @@ export class GameSocketController implements ISocketController {
 		try {
 			const [points, player1, player2] =
 				await this.mainService.calcAnswerPoints(data);
-
+			this.logger.warn(`${points.answer1.points}  ${points.answer2.points}`, this);
 			callback({
 				status: 'OK',
 				data: { points, player1, player2 },

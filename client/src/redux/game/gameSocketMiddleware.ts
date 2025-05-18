@@ -3,7 +3,6 @@ import { GameSocketAction } from "./actionTypes";
 import {
   addError,
   GameState,
-  nextQuestionForVoting,
   setGameCode,
   setPlayer,
   setPlayers,
@@ -92,7 +91,6 @@ export const gameSocketMiddleware =
         EVENTS.answerQuestion,
         action.payload
       )) as SocketAnswer<void>;
-      console.log(action.payload, response);
       if (response.errors) {
         store.dispatch(addError(response.errors));
       } else {
@@ -110,7 +108,6 @@ export const gameSocketMiddleware =
         store.dispatch(addError(response.errors));
       } else {
         store.dispatch(addError(null));
-        store.dispatch(nextQuestionForVoting());
       }
     }
 

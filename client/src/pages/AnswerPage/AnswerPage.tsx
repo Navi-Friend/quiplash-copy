@@ -34,7 +34,6 @@ export function AnswerPage() {
     }
 
     if (gameState.currentAnswersForVoting) {
-      console.log("navigate");
       navigate(routes.vote)
     }
   }, [gameState, timerValue]);

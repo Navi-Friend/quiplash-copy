@@ -15,16 +15,16 @@ export function Home() {
       </h1>
       <div className="space-y-4 flex flex-col">
         <Button
-          size="lg"
-          className={"w-64 h-16 text-xl font-bold"}
+          className={
+            "w-64 h-16 text-xl font-bold  border-3 border-black active:scale-95"
+          }
           onClick={() => setIsDialogOpen(true)}
         >
           Играть
         </Button>
         <GameStartDialog isOpen={isDialogOpen} onOpenChange={setIsDialogOpen} />
         <Button
-          size="lg"
-          className="w-64 h-16 text-xl font-bold"
+          className="w-64 h-16 text-xl  border-3 border-black font-bold active:scale-95"
           onClick={() => navigate(routes.rules)}
         >
           Правила
