@@ -1,28 +1,19 @@
 import { Middleware } from "@reduxjs/toolkit";
 import { GameSocketAction } from "./actionTypes";
 import {
-  addAnsweredPlayer,
   addError,
   GameState,
   nextQuestionForVoting,
-  setAvailableQuestionsForVoting,
   setGameCode,
   setPlayer,
-  setPlayerQuestions,
   setPlayers,
-  setQuestionForVoting,
-  setRoundId,
-  setTimer,
 } from "./gameSlice";
 import { socket } from "@/api/socket";
 import {
   GameModel,
   InitGame,
   JoinGame,
-  PlayerModel,
-  QuestionForVoting,
   SocketAnswer,
-  StartGame,
   VoteModel,
 } from "@/types";
 import { EVENTS } from "@/api/events";

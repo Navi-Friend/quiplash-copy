@@ -6,12 +6,7 @@ export class Vote {
 		private _playerName: string,
 		private _answerId: string,
 	) {}
-
-	// getAnswer(playerId: string, answerId: string): void {
-	// 	this._answer = answer;
-	// 	this._playerId = playerId;
-	// }
-
+	
 	static createNew(playerName: string, answerId: string): Vote {
 		return new Vote(v4(), playerName, answerId);
 	}

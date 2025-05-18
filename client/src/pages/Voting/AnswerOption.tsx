@@ -8,6 +8,7 @@ interface AnswerOptionProps {
   position: "left" | "right";
   isSelected?: boolean;
   onSelect: () => void;
+  disabled?: boolean;
 }
 
 export function AnswerOption({
@@ -16,6 +17,7 @@ export function AnswerOption({
   position,
   isSelected = false,
   onSelect,
+  disabled = false,
 }: AnswerOptionProps) {
   const rotation = position === "left" ? -3 : 3;
 
@@ -43,16 +45,23 @@ export function AnswerOption({
           className={cn(
             "bg-white rounded-none p-8 cursor-pointer \
              border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] \
-             hover:shadow-[15px_12px_0px_0px_rgba(0,0,0,1)] \
+             hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] \
              transition-all duration-200 \
              min-h-[200px] flex items-center justify-center",
             {
-              "shadow-[-8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[-15px_12px_0px_0px_rgba(0,0,0,1)]":
+              "shadow-[-8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[-12px_12px_0px_0px_rgba(0,0,0,1)]":
                 position === "left",
               "bg-gray-100 scale-95": isSelected,
+              "opacity-50 cursor-not-allowed hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]":
+                disabled,
+              "hover:shadow-[-8px_8px_0px_0px_rgba(0,0,0,1)]":
+                disabled && position === "left",
             }
           )}
-          onClick={onSelect}
+          whileHover={{
+            scale: disabled ? 1 : isSelected ? 0.95 : 1.05,
+          }}
+          onClick={() => !disabled && onSelect()}
         >
           <motion.p
             className={cn(

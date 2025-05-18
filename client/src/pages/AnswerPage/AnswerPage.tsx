@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect } from "react";
 import { GameSocketAction } from "@/redux/game/actionTypes";
 import { useNavigate } from "react-router-dom";
+import { routes } from "@/lib/routes";
 
 export function AnswerPage() {
   const gameState = useAppSelector((state) => state.game);
@@ -32,9 +33,9 @@ export function AnswerPage() {
       }
     }
 
-    if (gameState.currentQuestionForVotingIndex) {
+    if (gameState.currentAnswersForVoting) {
       console.log("navigate");
-      // TODO navigate
+      navigate(routes.vote)
     }
   }, [gameState, timerValue]);
 
