@@ -44,17 +44,10 @@ export class Round {
 		votes2: number,
 		roundNumber: number,
 	): VotingResult {
-		if (votes1 == votes2) {
-			return {
-				answer1: { answerId: answer1.answerId, points: 500 * roundNumber },
-				answer2: { answerId: answer2.answerId, points: 500 * roundNumber },
-				extra: null,
-			};
-		}
+		const answer1Text = answer1.answer.trim();
+		const answer2Text = answer2.answer.trim();
 
-		const answer1Text = answer1.answer;
-		const answer2Text = answer2.answer;
-
+		console.log(answer1Text, answer2Text, 'asdfasdfsadfsadfsdafsdafsdaf');
 		if (answer1Text === answer2Text) {
 			return {
 				answer1: { answerId: answer1.answerId, points: 0 },
@@ -84,6 +77,22 @@ export class Round {
 				extra: null,
 			};
 		}
+
+		if (votes1 == votes2) {
+			if (!votes1) {
+				return {
+					answer1: { answerId: answer1.answerId, points: 0 },
+					answer2: { answerId: answer2.answerId, points: 0 },
+					extra: null,
+				};
+			}
+			return {
+				answer1: { answerId: answer1.answerId, points: 500 * roundNumber },
+				answer2: { answerId: answer2.answerId, points: 500 * roundNumber },
+				extra: null,
+			};
+		}
+
 		const answer1Percentage = Math.round((votes1 / (votes1 + votes2)) * 100);
 		const answer2Percentage = Math.round((votes2 / (votes1 + votes2)) * 100);
 

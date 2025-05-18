@@ -71,7 +71,7 @@ export function VotingPage() {
             gameState.currentAnswersForVoting?.[1].answer
         ) {
           setStage(Stages.RESULTS);
-          setIsTimeExpired(true);
+          handleTimeExpired();
         } else {
           setStage(Stages.VOTING);
         }
